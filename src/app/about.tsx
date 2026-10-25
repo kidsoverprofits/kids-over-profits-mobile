@@ -42,6 +42,13 @@ export default function AboutScreen() {
         <Text accessibilityRole="header" style={type.subheading}>Share information</Text>
         <Text style={type.body}>Add or correct a facility, news story, lawsuit or survivor account.</Text>
         <Button variant="secondary" label="Open the form" icon="external" onPress={open('/tti-data-submission/')} style={styles.button} />
+
+        <Text accessibilityRole="header" style={type.subheading}>For volunteers</Text>
+        <HubListRow
+          title="Volunteer sign-in"
+          meta="Links you send go straight to the review queues. Everyone else can send without an account."
+          onPress={() => router.push('/reviewer')}
+        />
       </View>
 
       <DonateBox />
@@ -68,15 +75,6 @@ export default function AboutScreen() {
         {LINKS.map((l) => (
           <HubListRow key={l.path} title={l.title} meta={l.meta} onPress={open(l.path)} />
         ))}
-      </View>
-
-      <Text accessibilityRole="header" style={type.heading}>For reviewers</Text>
-      <View style={styles.paragraphs}>
-        <HubListRow
-          title="Reviewer sign-in"
-          meta="For the site's reviewers. Everyone else can send without an account."
-          onPress={() => router.push('/reviewer')}
-        />
       </View>
 
       {version ? <Text style={[type.meta, styles.version]}>{`Version ${version}`}</Text> : null}

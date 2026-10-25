@@ -58,10 +58,10 @@ describe('Send tab', () => {
   });
 });
 
-describe('Reviewer sign-in', () => {
+describe('Volunteer sign-in', () => {
   it('shows the fields and the sign-in button', async () => {
     await render(<ReviewerScreen />);
-    expect(screen.getByRole('header', { name: 'Reviewer sign-in' })).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Volunteer sign-in' })).toBeTruthy();
     expect(screen.getByLabelText('WordPress username')).toBeTruthy();
     expect(screen.getByLabelText('Application password')).toBeTruthy();
     expect(screen.getByLabelText('Sign in')).toBeTruthy();

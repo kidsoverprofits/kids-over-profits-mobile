@@ -15,6 +15,7 @@ import { SearchField } from '@/components/tabs/SearchField';
 import { TabPage } from '@/components/tabs/TabPage';
 import { useDebounced } from '@/components/tabs/useDebounced';
 import { ErrorState, Loading } from '@/components/ui';
+import { useCredentials } from '@/lib/credentials';
 import { openLink } from '@/lib/links';
 import { clearRecent, useRecent } from '@/lib/recent';
 import { spacing, type } from '@/theme/typography';
@@ -38,6 +39,7 @@ function HomeContent() {
   const go = (href: string) => router.push(href as Href);
   const news = useNews();
   const recent = useRecent();
+  const { creds } = useCredentials();
   const latest = (news.data?.pages[0]?.items ?? []).slice(0, HOME_NEWS);
 
   const shortcuts: Shortcut[] = [
@@ -47,6 +49,13 @@ function HomeContent() {
     { key: 'news', label: 'News', meta: 'Articles and ongoing stories', icon: 'newspaper', onPress: () => go('/news') },
     { key: 'send', label: 'Send a tip', meta: 'An article, lawsuit or correction', icon: 'send', onPress: () => go('/send') },
     { key: 'about', label: 'About', meta: 'Who we are, how the data works', icon: 'info', onPress: () => go('/about') },
+    {
+      key: 'volunteer',
+      label: 'Volunteers',
+      meta: creds ? `Signed in as ${creds.username}` : 'Sign in to send straight to review',
+      icon: 'key',
+      onPress: () => go('/reviewer'),
+    },
   ];
 
   return (

@@ -250,6 +250,9 @@ export default function SendScreen() {
       <Notice kind="info">
         Everything you send is reviewed by a person before it appears on the site. You do not need an account.
       </Notice>
+      {creds ? null : (
+        <Button variant="secondary" label="Volunteer? Sign in" icon="key" onPress={() => router.push('/reviewer')} style={styles.button} />
+      )}
 
       <Choice label="What to send" options={PATHS} value={path} onChange={choosePath} />
 
@@ -356,8 +359,8 @@ export default function SendScreen() {
       ) : null}
 
       {reviewer ? (
-        <Notice kind="info" title="Signed in as a reviewer">
-          Links go straight to the review queues. You can sign out under About.
+        <Notice kind="info" title={`Signed in as ${creds?.username ?? 'a volunteer'}`}>
+          Links go straight to the review queues. You can sign out under Volunteer sign-in on the Home screen.
         </Notice>
       ) : (
         <Section title="About you (optional)">

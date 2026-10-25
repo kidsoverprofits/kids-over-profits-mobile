@@ -39,7 +39,7 @@ export default function RootLayout() {
             <Stack.Screen name="place/[slug]" options={{ title: 'Place' }} />
             <Stack.Screen name="documents/[slug]" options={{ title: 'Documents' }} />
             <Stack.Screen name="doc" options={{ title: 'Document' }} />
-            <Stack.Screen name="reviewer" options={{ title: 'Reviewer sign-in' }} />
+            <Stack.Screen name="reviewer" options={{ title: 'Volunteer sign-in' }} />
             <Stack.Screen name="reviewer-auth" options={{ title: 'Signing in' }} />
             <Stack.Screen name="admin-tool" options={{ title: 'KOP Tools' }} />
             <Stack.Screen name="resources" options={{ title: 'Resources' }} />

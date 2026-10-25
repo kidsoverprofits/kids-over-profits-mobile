@@ -119,11 +119,11 @@ export default function ReviewerScreen() {
 
   return (
     <TabPage>
-      <HubHeader eyebrow="Send" title="Reviewer sign-in" />
+      <HubHeader eyebrow="Volunteers" title="Volunteer sign-in" />
       <Section title="Sign in">
         <>
           <Text style={type.body}>
-            For the site&apos;s reviewers. Sign in with WordPress opens the site&apos;s login; after you log in, tap Approve and the app keeps its own login in this device&apos;s secure storage. It stays signed in until you sign out here or revoke it in WordPress under Users, Profile, Application Passwords.
+            For the site&apos;s volunteers and reviewers. Sign in with WordPress opens the site&apos;s login; after you log in, tap Approve and the app keeps its own login in this device&apos;s secure storage. It stays signed in until you sign out here or revoke it in WordPress under Users, Profile, Application Passwords.
           </Text>
           <Text style={type.body}>Everyone else can send links and facility information without signing in.</Text>
         </>

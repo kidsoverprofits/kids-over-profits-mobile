@@ -110,7 +110,7 @@ export default function AdminScreen() {
 
           <NoticeBox variant="reporting" title="Your WordPress sessions">
             <Text style={type.body}>
-              Tools open signed in on this phone, and the app signs in again by itself when WordPress asks. Signing out under About, Reviewer sign-in, or revoking this app&apos;s application password in WordPress (Users, Profile) ends its session at once.
+              Tools open signed in on this phone, and the app signs in again by itself when WordPress asks. Signing out under Volunteer sign-in (Home, Volunteers), or revoking this app&apos;s application password in WordPress (Users, Profile) ends its session at once.
             </Text>
             <Button variant="secondary" label="Sign out everywhere" onPress={confirmSignOut} style={styles.button} />
             {note ? <Text style={type.body}>{note}</Text> : null}

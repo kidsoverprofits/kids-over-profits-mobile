@@ -15,6 +15,7 @@ const mockPush = jest.fn();
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { version: '1.2.3' } } }));
 jest.mock('expo-web-browser', () => ({ openBrowserAsync: jest.fn() }));
+jest.mock('@/lib/credentials', () => ({ useCredentials: () => ({ creds: null, ready: true, reload: jest.fn() }) }));
 jest.mock('@/api/queries', () => ({
   SUGGEST_MIN: 2,
   useAppSuggest: jest.fn(),
@@ -65,7 +66,7 @@ describe('Home tab', () => {
     await render(<HomeScreen />);
     expect(screen.getByText('Find a program')).toBeTruthy();
     expect(screen.queryByText('Type at least two letters to search.')).toBeNull();
-    for (const label of ['Network map', 'Companies', 'States', 'News', 'Send a tip', 'About']) expect(screen.getByText(label)).toBeTruthy();
+    for (const label of ['Network map', 'Companies', 'States', 'News', 'Send a tip', 'About', 'Volunteers']) expect(screen.getByText(label)).toBeTruthy();
     for (const item of news.items.slice(0, HOME_NEWS)) expect(screen.getByText(item.title)).toBeTruthy();
     expect(screen.queryByText(news.items[HOME_NEWS].title)).toBeNull();
     expect(screen.getByText('Need help now?')).toBeTruthy();

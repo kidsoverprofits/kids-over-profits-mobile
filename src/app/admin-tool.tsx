@@ -36,7 +36,7 @@ export default function AdminToolScreen() {
     setState('loading');
     try {
       const creds = await loadCredentials();
-      if (!creds) throw new Error('Sign in under About, Reviewer sign-in first.');
+      if (!creds) throw new Error('Sign in first: Home, Volunteers.');
       const login = await startAdminSession(creds, redirect);
       await markAdminSession();
       signedInHere.current = true;
