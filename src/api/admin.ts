@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { API_BASE, SITE } from '@/api/client';
 import { basicHeaders, send } from '@/api/submit';
 import type { Credentials } from '@/api/types';
+import { rememberAdmin } from '@/lib/adminSession';
 
 /**
  * Admin mode (inc/mobile-admin.php in the theme): the KOP Tools list, a WordPress cookie session for the
@@ -14,7 +15,7 @@ export type AdminTools = { user: string; tools: AdminTool[] };
 type Json = Record<string, unknown>;
 
 function message(status: number, body: Json): string {
-  if (status === 401) return 'WordPress rejected the login. Sign in again under About, Reviewer sign-in.';
+  if (status === 401) return 'WordPress rejected the login (its application password may have been revoked). Sign in again.';
   if (status === 403) return 'This account is not an administrator.';
   if (status === 404) return 'The site does not have admin mode yet.';
   return typeof body.message === 'string' && body.message ? body.message : `The site answered ${status}.`;
@@ -23,7 +24,11 @@ function message(status: number, body: Json): string {
 export async function fetchAdminTools(creds: Credentials, fetchImpl: typeof fetch = fetch): Promise<AdminTools> {
   const res = await send({ url: `${API_BASE}/app/tools`, method: 'GET', headers: { Accept: 'application/json', ...basicHeaders(creds) } }, fetchImpl);
   if ('network' in res) throw new Error(res.network);
-  if (!res.ok) throw Object.assign(new Error(message(res.status, res.body)), { status: res.status });
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) await rememberAdmin(null);
+    throw Object.assign(new Error(message(res.status, res.body)), { status: res.status });
+  }
+  await rememberAdmin(creds.username);
   const list = Array.isArray(res.body.tools) ? (res.body.tools as Json[]) : [];
   return {
     user: String(res.body.user ?? creds.username),

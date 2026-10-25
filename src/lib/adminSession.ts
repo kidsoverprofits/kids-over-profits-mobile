@@ -34,6 +34,29 @@ export async function clearAdminSession(): Promise<void> {
   }
 }
 
+/**
+ * The username the site last confirmed as an administrator's, so the Admin tab shows at once (and offline)
+ * instead of waiting for the tools list; cleared when the site rejects the login or on sign-out.
+ */
+const ADMIN_KEY = 'kop_admin_user';
+
+export async function rememberedAdmin(): Promise<string> {
+  try {
+    return (await AsyncStorage.getItem(ADMIN_KEY)) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+export async function rememberAdmin(username: string | null): Promise<void> {
+  try {
+    if (username) await AsyncStorage.setItem(ADMIN_KEY, username);
+    else await AsyncStorage.removeItem(ADMIN_KEY);
+  } catch {
+    // the tab waits for the tools list instead
+  }
+}
+
 const bareHost = (h: string) => h.toLowerCase().replace(/^www\./, '');
 
 /** True for any page of kidsoverprofits.org (www or not), which stays in the admin web view. */

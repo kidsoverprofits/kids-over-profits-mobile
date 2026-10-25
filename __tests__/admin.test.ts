@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { fetchAdminTools, signOutEverywhere, startAdminSession } from '@/api/admin';
-import { groupTools } from '@/app/(tabs)/admin';
-import { clearAdminSession, hasAdminSession, isSiteUrl, loginRedirect, markAdminSession } from '@/lib/adminSession';
+import { groupTools, reviewInbox } from '@/app/(tabs)/admin';
+import { clearAdminSession, hasAdminSession, isSiteUrl, loginRedirect, markAdminSession, rememberedAdmin } from '@/lib/adminSession';
+import { APP_ID, authorizeUrl, readAuthorizeResult, readAuthorizeUrl } from '@/lib/wpAuthorize';
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }), useFocusEffect: jest.fn() }));
 
@@ -65,6 +66,15 @@ describe('admin API', () => {
   it('names a non-admin account', async () => {
     await expect(fetchAdminTools(creds, fakeFetch(403, { code: 'rest_forbidden' }))).rejects.toThrow('not an administrator');
   });
+  it('remembers an administrator for the Admin tab until the site rejects the login', async () => {
+    await AsyncStorage.clear();
+    await fetchAdminTools(creds, fakeFetch(200, { user: 'Dani', tools: [] }));
+    expect(await rememberedAdmin()).toBe('dani');
+    await expect(fetchAdminTools(creds, fakeFetch(500, {}))).rejects.toThrow();
+    expect(await rememberedAdmin()).toBe('dani');
+    await expect(fetchAdminTools(creds, fakeFetch(401, {}))).rejects.toThrow('Sign in again');
+    expect(await rememberedAdmin()).toBe('');
+  });
   it('asks for a session landing on the tool', async () => {
     const f = fakeFetch(200, { url: 'https://kidsoverprofits.org/app-login/?t=ab12' });
     await expect(startAdminSession(creds, 'https://kidsoverprofits.org/wp-admin/', f)).resolves.toBe('https://kidsoverprofits.org/app-login/?t=ab12');
@@ -91,5 +101,42 @@ describe('groupTools', () => {
     ]);
     expect(groupTools(tools, 'forum').map((g) => g.tools[0].title)).toEqual(['Fornits']);
     expect(groupTools(tools, 'zzz')).toEqual([]);
+  });
+});
+
+describe('reviewInbox', () => {
+  it('picks Submissions Review, else the first review queue tool', () => {
+    const all = { category: 'KOP Tools', title: 'All tools', desc: '', url: 'u0' };
+    const inbox = { category: 'Review queue', title: 'Submissions Review', desc: '', url: 'u1' };
+    const other = { category: 'Review queue', title: 'Fornits', desc: '', url: 'u2' };
+    expect(reviewInbox([all, other, inbox])).toBe(inbox);
+    expect(reviewInbox([all, other])).toBe(other);
+    expect(reviewInbox([all])).toBeUndefined();
+  });
+});
+
+describe('WordPress Authorize Application', () => {
+  it('asks for a named app password that comes back to the app', () => {
+    const u = new URL(authorizeUrl('kidsoverprofits://reviewer-auth', 'Android'));
+    expect(u.origin + u.pathname).toBe('https://kidsoverprofits.org/wp-admin/authorize-application.php');
+    expect(u.searchParams.get('app_name')).toBe('Kids Over Profits app (Android)');
+    expect(u.searchParams.get('app_id')).toBe(APP_ID);
+    expect(u.searchParams.get('success_url')).toBe('kidsoverprofits://reviewer-auth');
+    expect(u.searchParams.get('reject_url')).toBe('kidsoverprofits://reviewer-auth?rejected=1');
+  });
+  it('reads the login WordPress sends back', () => {
+    expect(
+      readAuthorizeUrl('kidsoverprofits://reviewer-auth?site_url=https%3A%2F%2Fkidsoverprofits.org&user_login=dani%40x&password=abcd%20EFGH%20ijkl'),
+    ).toEqual({ kind: 'ok', creds: { username: 'dani@x', appPassword: 'abcdEFGHijkl' } });
+    expect(readAuthorizeUrl('exp://192.168.1.2:8081/--/reviewer-auth?user_login=dani&password=abcd')).toEqual({
+      kind: 'ok',
+      creds: { username: 'dani', appPassword: 'abcd' },
+    });
+  });
+  it('tells a refusal from a closed window', () => {
+    expect(readAuthorizeUrl('kidsoverprofits://reviewer-auth?rejected=1')).toEqual({ kind: 'rejected' });
+    expect(readAuthorizeResult({ success: 'false' })).toEqual({ kind: 'rejected' });
+    expect(readAuthorizeUrl('')).toEqual({ kind: 'none' });
+    expect(readAuthorizeResult({ user_login: ['dani'], password: undefined })).toEqual({ kind: 'none' });
   });
 });

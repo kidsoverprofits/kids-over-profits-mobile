@@ -1,10 +1,12 @@
 import { Tabs } from 'expo-router/js-tabs';
 import type { ColorValue } from 'react-native';
+import { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAdminTools } from '@/api/admin';
 import { HeaderDonateButton } from '@/components/Donate';
 import { Icon, type IconName } from '@/components/Icon';
+import { rememberedAdmin } from '@/lib/adminSession';
 import { useCredentials } from '@/lib/credentials';
 import { colors } from '@/theme/colors';
 
@@ -19,9 +21,19 @@ const TAB_BAR_HEIGHT = 70;
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
-  // The Admin tab appears only once the site has said the saved login is an administrator's.
+  // The Admin tab appears only once the site has said the saved login is an administrator's (this time, or
+  // any time before: the note keeps the tab there offline and while the tools list loads).
   const { creds } = useCredentials();
-  const admin = !!useAdminTools(creds).data;
+  const tools = useAdminTools(creds);
+  const [known, setKnown] = useState('');
+  useEffect(() => {
+    let live = true;
+    void rememberedAdmin().then((u) => live && setKnown(u));
+    return () => {
+      live = false;
+    };
+  }, [creds, tools.data, tools.error]);
+  const admin = !!creds && (!!tools.data || known === creds.username);
   return (
     <Tabs
       screenOptions={{
