@@ -141,7 +141,15 @@ export async function send(spec: RequestSpec, fetchImpl: typeof fetch): Promise<
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const res = await fetchImpl(spec.url, { method: spec.method, headers: spec.headers, body: spec.body, signal: controller.signal });
+    // No cookies: on Android these requests share the admin web view's cookie jar, and WordPress ignores the
+    // application password when a login cookie comes with it (no nonce), so the route answers 401.
+    const res = await fetchImpl(spec.url, {
+      method: spec.method,
+      headers: spec.headers,
+      body: spec.body,
+      credentials: 'omit',
+      signal: controller.signal,
+    });
     let body: Json = {};
     try {
       body = (await res.json()) as Json;
