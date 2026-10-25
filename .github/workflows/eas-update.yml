@@ -1,0 +1,56 @@
+# Every push to main that changes the app's code goes over the air (EAS Update) to installed preview builds.
+# Needs the repository secret EXPO_TOKEN (expo.dev > Account settings > Access tokens).
+# A push that also changes package.json, app.json or eas.json is skipped: native changes need a new build
+# (an update reaches builds of the same app.json version and would crash one missing a native package).
+name: EAS Update
+
+on:
+  push:
+    branches: [main]
+    paths: ['src/**', 'assets/**']
+  workflow_dispatch:
+
+concurrency:
+  group: eas-update
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Skip when the push needs a new build
+        id: native
+        run: |
+          before='${{ github.event.before }}'
+          if [ -n "$before" ] && git cat-file -e "$before" 2>/dev/null && \
+             git diff --name-only "$before" HEAD | grep -qxE 'package\.json|package-lock\.json|app\.json|eas\.json'; then
+            echo "::warning::package.json, app.json or eas.json changed: make a new build (eas build) instead of an update."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.native.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        if: steps.native.outputs.skip != 'true'
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - if: steps.native.outputs.skip != 'true'
+        run: npm ci
+
+      - name: Typecheck
+        if: steps.native.outputs.skip != 'true'
+        run: npx tsc --noEmit
+
+      - name: Publish to the preview channel
+        if: steps.native.outputs.skip != 'true'
+        run: eas update --channel preview --environment preview --non-interactive --message "$(git log -1 --pretty=%s)"

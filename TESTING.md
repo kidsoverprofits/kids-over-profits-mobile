@@ -103,8 +103,11 @@ another app only works in a build like this, not in Expo Go.
 
 ## Updating an installed build without reinstalling (EAS Update)
 
-An installed build (made after `expo-updates` was added) fetches new code by itself. To send the
-newest code to every phone with a preview build:
+An installed build (made after `expo-updates` was added) fetches new code by itself. Every push to
+`main` that changes `src/` or `assets/` publishes it to the preview channel on its own (GitHub Actions,
+`.github/workflows/eas-update.yml`, using the repository secret `EXPO_TOKEN`). A push that also changes
+`package.json`, `app.json` or `eas.json` is skipped with a warning, because it needs a new build. To
+publish by hand instead:
 
 ```powershell
 git pull
