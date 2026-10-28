@@ -11,6 +11,7 @@ import { CheckRow, Choice, CompanyField, FacilityPicker, Field, FormSection as S
 import { Button, HubHeader } from '@/components/site';
 import { TabPage } from '@/components/tabs/TabPage';
 import { classifyUrl, type ClassifyFields } from '@/lib/classify';
+import { rememberedAdmin } from '@/lib/adminSession';
 import { useCredentials } from '@/lib/credentials';
 import { fetchPageMeta, type PageMeta } from '@/lib/pageMeta';
 import { extractUrl, looksLikeEmail } from '@/lib/sendLink';
@@ -85,6 +86,15 @@ export default function SendScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ url?: string; mode?: string; facility_id?: string; facility?: string; ts?: string }>();
   const { creds } = useCredentials();
+
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    let live = true;
+    void rememberedAdmin().then((u) => live && setIsAdmin(!!creds && !!u && u === creds.username));
+    return () => {
+      live = false;
+    };
+  }, [creds]);
 
   const [path, setPath] = useState<Path>('link');
   const [d, setD] = useState<SubmitDraft>(() => emptyDraft('article'));
@@ -277,6 +287,17 @@ export default function SendScreen() {
                 ? dup.data.duplicates.map((x) => `${x.type}: ${x.status}`).join('. ')
                 : 'This link is already on the site or in review.'}
             </Notice>
+          ) : null}
+
+          {isAdmin && isWebUrl(d.url) && (d.type === 'article' || d.type === 'lawsuit') ? (
+            <Button
+              label={d.type === 'lawsuit' ? 'Open in Lawsuit Processor' : 'Open in News Processor'}
+              icon={d.type === 'lawsuit' ? 'scale' : 'news'}
+              onPress={() =>
+                router.push({ pathname: d.type === 'lawsuit' ? '/lawsuit-processor' : '/news-processor', params: { url: d.url.trim() } })
+              }
+              style={styles.button}
+            />
           ) : null}
 
           <Text style={type.smallBold}>Type</Text>

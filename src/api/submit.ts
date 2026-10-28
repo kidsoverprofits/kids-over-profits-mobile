@@ -169,7 +169,7 @@ export async function send(spec: RequestSpec, fetchImpl: typeof fetch): Promise<
   }
 }
 
-function duplicatesOf(body: Json): DuplicateInfo[] {
+export function duplicatesOf(body: Json): DuplicateInfo[] {
   const list = Array.isArray(body.duplicates) ? (body.duplicates as Json[]) : [];
   return list.map((d) => ({
     type: String(d.type ?? ''),

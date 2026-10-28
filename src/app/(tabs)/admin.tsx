@@ -92,6 +92,11 @@ export default function AdminScreen() {
               <Text style={type.meta}>Every approval queue in one place, with Undo.</Text>
             </View>
           ) : null}
+          <View style={styles.block}>
+            <Button label="Process a news article" icon="news" variant="secondary" onPress={() => router.push('/news-processor')} style={styles.button} />
+            <Button label="Process a lawsuit" icon="scale" variant="secondary" onPress={() => router.push('/lawsuit-processor')} style={styles.button} />
+            <Text style={type.meta}>The site&apos;s AI reads a link and fills the fields. You edit them, then publish or send to the review queue.</Text>
+          </View>
           <SearchField value={q} onChangeText={setQ} placeholder="Find a tool" label="Find a tool" />
           {groups.map((g) => (
             <View key={g.category} style={styles.block}>

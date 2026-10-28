@@ -42,6 +42,8 @@ export default function RootLayout() {
             <Stack.Screen name="reviewer" options={{ title: 'Volunteer sign-in' }} />
             <Stack.Screen name="reviewer-auth" options={{ title: 'Signing in' }} />
             <Stack.Screen name="admin-tool" options={{ title: 'KOP Tools' }} />
+            <Stack.Screen name="news-processor" options={{ title: 'News Processor' }} />
+            <Stack.Screen name="lawsuit-processor" options={{ title: 'Lawsuit Processor' }} />
             <Stack.Screen name="resources" options={{ title: 'Resources' }} />
             <Stack.Screen name="about" options={{ title: 'About' }} />
           </Stack>
