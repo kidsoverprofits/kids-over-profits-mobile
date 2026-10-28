@@ -8,6 +8,8 @@ import {
   fetchLawsuitForm,
   mergeLines,
   processArticle,
+  processLawsuit,
+  lawsuitReadNote,
   processorErrorMessage,
   readLawsuitFields,
   readNewsFields,
@@ -84,10 +86,25 @@ describe('submit bodies', () => {
       plaintiffs: ['A'], defendants: [], claims: ['x', 'y'], tags: ['t1', 't2'], document_urls: [],
     });
     expect(buildLawsuitSubmitBody(emptyLawsuitDraft('https://c.org/2'), false).title).toBe('https://c.org/2');
+    expect(buildLawsuitSubmitBody(d, false).source_urls).toEqual([]);
+    const withDocket = { ...d, docket_url: 'https://www.courtlistener.com/docket/1/a-v-b/' };
+    expect(buildLawsuitSubmitBody(withDocket, false).source_urls).toEqual(['https://www.courtlistener.com/docket/1/a-v-b/']);
+    expect(buildLawsuitSubmitBody({ ...withDocket, url: withDocket.docket_url }, false).source_urls).toEqual([]);
   });
 });
 
 describe('requests', () => {
+  it('reads the CourtListener docket the site matched', async () => {
+    const out = await processLawsuit(creds, { url: 'https://x.org', text: '', instructions: '' },
+      fakeFetch(200, { fields: { case_name: 'A v. B', plaintiffs: ['A'] }, courtlistener: { url: 'https://www.courtlistener.com/docket/1/a-v-b/', by: 'case_number' } }));
+    expect(out.fields.case_name).toBe('A v. B');
+    expect(out.docket).toEqual({ url: 'https://www.courtlistener.com/docket/1/a-v-b/', by: 'case_number' });
+    expect(lawsuitReadNote(out.docket)).toMatch(/CourtListener docket for this case number/);
+    const plain = await processLawsuit(creds, { url: 'https://x.org', text: '', instructions: '' }, fakeFetch(200, { fields: { case_name: 'C v. D' } }));
+    expect(plain.docket).toBeNull();
+    expect(lawsuitReadNote(plain.docket)).toBe('Filled in. Check each field before saving.');
+  });
+
   it('says plainly when the site has no lawsuit routes', async () => {
     await expect(fetchLawsuitForm(creds, fakeFetch(404, { code: 'rest_no_route' }))).rejects.toThrow(/does not have the Lawsuit Processor yet/);
     expect(processorErrorMessage('news', 404, {})).toMatch(/News Processor/);

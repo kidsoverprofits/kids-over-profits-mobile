@@ -6,6 +6,7 @@ import {
   applyLawsuitFields,
   buildLawsuitSubmitBody,
   emptyLawsuitDraft,
+  lawsuitReadNote,
   processLawsuit,
   submitProcessed,
   useLawsuitForm,
@@ -57,9 +58,9 @@ export default function LawsuitProcessorScreen() {
     setReading(true);
     setReadNote('');
     try {
-      const fields = await processLawsuit(creds, { url: d.url.trim(), text: text.trim(), instructions: instructions.trim() });
-      setD((p) => applyLawsuitFields(p, fields, form.data?.statuses));
-      setReadNote('Filled in. Check each field before saving.');
+      const { fields, docket } = await processLawsuit(creds, { url: d.url.trim(), text: text.trim(), instructions: instructions.trim() });
+      setD((p) => ({ ...applyLawsuitFields(p, fields, form.data?.statuses), docket_url: docket?.url ?? p.docket_url }));
+      setReadNote(lawsuitReadNote(docket));
     } catch (e) {
       setReadNote((e as Error).message);
     } finally {

@@ -99,7 +99,11 @@ export type LawsuitDraft = {
   claims: string;
   tags: string;
   notes: string;
+  /** The CourtListener docket page the site matched, kept as a second source. */
+  docket_url: string;
 };
+/** The site's read of a case: the fields, and the CourtListener docket it filled them from (by its link or the case number). */
+export type LawsuitRead = { fields: LawsuitFields; docket: { url: string; by: 'link' | 'case_number' } | null };
 
 export type ProcessorKind = 'news' | 'lawsuit';
 export type ProcessorOutcome =
@@ -114,7 +118,7 @@ export const emptyNewsDraft = (url = ''): NewsDraft => ({
 export const emptyLawsuitDraft = (url = ''): LawsuitDraft => ({
   url, case_name: '', case_number: '', court: '', jurisdiction: '', filing_date: '', status: '', outcome: '',
   settlement_amount: '', summary: '', plaintiffs: '', defendants: '', facilities_mentioned: '', staff_mentioned: '',
-  organizations_mentioned: '', claims: '', tags: '', notes: '',
+  organizations_mentioned: '', claims: '', tags: '', notes: '', docket_url: '',
 });
 
 /* ---------- pure helpers ---------- */
@@ -273,6 +277,7 @@ export function buildLawsuitSubmitBody(d: LawsuitDraft, publish: boolean): Json 
     claims: lines(d.claims),
     tags: commaList(d.tags),
     document_urls: [],
+    source_urls: d.docket_url.trim() && d.docket_url.trim() !== d.url.trim() ? [d.docket_url.trim()] : [],
     submitted_via: 'app',
   };
   for (const k of ['case_name', 'case_number', 'court', 'jurisdiction', 'filing_date', 'status', 'outcome', 'settlement_amount', 'summary', 'notes'] as const) {
@@ -336,9 +341,19 @@ export async function processArticle(creds: Credentials, input: ProcessInput, fe
   return readNewsFields((b.fields ?? {}) as Json);
 }
 
-export async function processLawsuit(creds: Credentials, input: ProcessInput, fetchImpl: typeof fetch = fetch): Promise<LawsuitFields> {
+export async function processLawsuit(creds: Credentials, input: ProcessInput, fetchImpl: typeof fetch = fetch): Promise<LawsuitRead> {
   const b = await call('lawsuit', spec('/lawsuit-process', creds, 'POST', { ...input }), fetchImpl);
-  return readLawsuitFields((b.fields ?? {}) as Json);
+  const cl = (b.courtlistener ?? null) as Json | null;
+  const docket = cl && str(cl.url) ? { url: str(cl.url), by: cl.by === 'link' ? ('link' as const) : ('case_number' as const) } : null;
+  return { fields: readLawsuitFields((b.fields ?? {}) as Json), docket };
+}
+
+/** The note under Read after a case is read. */
+export function lawsuitReadNote(docket: LawsuitRead['docket']): string {
+  if (!docket) return 'Filled in. Check each field before saving.';
+  return docket.by === 'link'
+    ? 'Filled in from the CourtListener docket and the AI read. Check each field before saving.'
+    : 'Filled in. The case name, number, court, filing date and parties are from the CourtListener docket for this case number. Check each field before saving.';
 }
 
 export async function findArchive(creds: Credentials, url: string, fetchImpl: typeof fetch = fetch): Promise<ArchiveResult> {
