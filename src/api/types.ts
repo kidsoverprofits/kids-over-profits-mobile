@@ -418,6 +418,8 @@ export type OperatorPayload = {
   url: string;
   aka: string[];
   current_name: string;
+  /** The record's name, when the page is titled by the popular name it uses now (operator.popularName). */
+  formerly?: string[];
   status: string;
   facts: Fact[];
   parents: { name: string; url: string }[];

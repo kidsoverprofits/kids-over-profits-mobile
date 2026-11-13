@@ -4,10 +4,18 @@ import { aliasLabel } from '@/lib/alias';
 
 const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
+/**
+ * The names under the title. Titled by its popular name, the record's name is on one of the lines already
+ * (Now known as / Formerly / Also known as), so the full name is not repeated bare.
+ */
 export function aliasLines(o: OperatorPayload): string[] {
+  const formerly = o.formerly ?? [];
+  const key = (n: string | undefined) => (n ?? '').trim().toLowerCase();
+  const named = new Set([o.name, o.current_name, ...formerly, ...(o.aka ?? [])].map(key));
   return [
-    ...(o.full_name && o.full_name !== o.name ? [o.full_name] : []),
+    ...(o.full_name && !named.has(key(o.full_name)) ? [o.full_name] : []),
     ...(o.current_name ? [aliasLabel('current', o.current_name)] : []),
+    ...formerly.map((n) => aliasLabel('past', n)),
     ...(o.aka ?? []).map((n) => aliasLabel('other', n)),
   ];
 }
