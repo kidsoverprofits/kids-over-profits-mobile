@@ -12,10 +12,17 @@ import { homeRows } from './model';
 export function HeaderBlock({ f }: { f: FacilityPayload }) {
   const open = useOpenLink();
   const past = f.formerly ?? [];
+  // A past name's years, keyed by the name ("Formerly Sedona Sky Academy (2006-2014)"); an empty list when none has years.
+  const years = (n: string) => (f.formerly_years && !Array.isArray(f.formerly_years) ? f.formerly_years[n] ?? '' : '');
+  const later = (f.later ?? []).filter(Boolean);
   const aliases: AliasLine[] = [
     ...(f.current_name ? [aliasLabel('current', f.current_name)] : []),
     // The past names' sources follow the last of them, as the website's one "Formerly" line ends with them.
-    ...past.map((n, i) => ({ text: aliasLabel('past', n), sources: i === past.length - 1 ? f.fact_sources?.formerly : undefined })),
+    ...past.map((n, i) => ({
+      text: `${aliasLabel('past', n)}${years(n) ? ` (${years(n)})` : ''}`,
+      sources: i === past.length - 1 ? f.fact_sources?.formerly : undefined,
+    })),
+    ...(later.length ? [`Later called ${later.join(', ')}`] : []),
     ...(f.aka ?? []).map((n) => aliasLabel('other', n)),
   ];
   const where = f.state_name || f.country;

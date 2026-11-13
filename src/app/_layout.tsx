@@ -5,10 +5,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { DisclaimerGate } from '@/components/DisclaimerGate';
 import { ShareIntentHandler } from '@/components/ShareIntentHandler';
+import { UpdateBanner } from '@/components/UpdateBanner';
+import { refetchWhenAppReturns } from '@/lib/refresh';
 import { colors } from '@/theme/colors';
 
+// Returning to the app reads stale screens again from the live site (lib/refresh.tsx).
+refetchWhenAppReturns();
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: true } },
 });
 
 const theme = {
@@ -49,6 +53,7 @@ export default function RootLayout() {
           </Stack>
           <ShareIntentHandler />
           <DisclaimerGate />
+          <UpdateBanner />
         </ThemeProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

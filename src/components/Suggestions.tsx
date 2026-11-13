@@ -16,26 +16,49 @@ export function KindPill({ kind }: { kind: SuggestKind }) {
   );
 }
 
+/**
+ * A search result's other names and places, at most two lines: the names (4, then "and N more"), the places (3).
+ * Mirrors kop_v2_search_preview_lines() in the theme (inc/facility-v2-readers.php) and the website's search popup.
+ */
+export function previewLines(item: { names?: string[]; places?: string[] }): string[] {
+  const out: string[] = [];
+  for (const [list, max] of [[item.names ?? [], 4], [item.places ?? [], 3]] as [string[], number][]) {
+    const words = list.filter(Boolean);
+    if (!words.length) continue;
+    out.push(words.slice(0, max).join('; ') + (words.length > max ? `; and ${words.length - max} more` : ''));
+  }
+  return out;
+}
+
 /** The app screen for a suggestion, or null when the record has no page. */
 export function suggestionHref(item: Pick<AppSuggestItem, 'kind' | 'slug'>): Href | null {
   return item.slug ? (`/${item.kind}/${encodeURIComponent(item.slug)}` as Href) : null;
 }
 
-/** One suggestion: the pill and the name, then "Formerly X" when another name matched, then the place. */
+/**
+ * One suggestion: the pill and the name, then its other names (the one that matched first) and other places, as the
+ * website's search shows them; an older site sends only the "Formerly X" hint. Then the place.
+ */
 export function SuggestionRow({ item, onPress }: { item: AppSuggestItem; onPress: () => void }) {
   const status = item.status.trim();
   const line = [item.place, status].filter(Boolean).join(' · ');
+  const preview = previewLines(item);
+  const hints = preview.length ? preview : item.hint ? [item.hint] : [];
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="link"
-      accessibilityLabel={[item.kind === 'operator' ? 'Company' : 'Facility', item.name, item.hint, item.place, status].filter(Boolean).join('. ')}
+      accessibilityLabel={[item.kind === 'operator' ? 'Company' : 'Facility', item.name, ...hints, item.place, status].filter(Boolean).join('. ')}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
       <View style={styles.top}>
         <KindPill kind={item.kind} />
         <Text style={styles.name}>{item.name}</Text>
       </View>
-      {item.hint ? <Text style={styles.hint}>{item.hint}</Text> : null}
+      {hints.map((h, i) => (
+        <Text key={i} style={styles.hint}>
+          {h}
+        </Text>
+      ))}
       {line ? (
         <View style={styles.bottom}>
           {status ? <View style={[styles.dot, { backgroundColor: directoryStatusColor(status) }]} /> : null}

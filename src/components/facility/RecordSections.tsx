@@ -2,6 +2,7 @@ import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Era, FacilityPayload, LawsuitRow, MemorialRow } from '@/api/types';
+import { cleanProse } from '@/lib/citations';
 import { colors } from '@/theme/colors';
 import { radius, spacing, type } from '@/theme/typography';
 import {
@@ -9,6 +10,7 @@ import {
   EdgeRow,
   FindingCard,
   HubListRow,
+  InlineSources,
   RecordNewsCard,
   SectionBlock,
   useOpenLink,
@@ -129,6 +131,82 @@ export function HomesSection({ f, onLayoutY }: SectionProps & { f: FacilityPaylo
   );
 }
 
+/** Separate programs on the same campus, or a program and its academic program (school), as the website words it. */
+export function CampusSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
+  const c = f.campus;
+  const others = c?.others ?? [];
+  if (!c || !others.length) return null;
+  const schoolOf = c.school_of?.length ?? 0;
+  const schoolOnly = schoolOf + (c.schools?.length ?? 0) === others.length;
+  const campus = (c.name ?? '').replace(/^the\s+/i, '');
+  const title = schoolOnly
+    ? schoolOf ? 'The program it is the school of' : 'Its academic program'
+    : `Other programs on ${campus ? `the ${campus}` : 'the same campus'}`;
+  const lead = schoolOnly
+    ? schoolOf
+      ? 'This is the academic program (the school) of the program below. Each has its own page and its own records.'
+      : "The program's school, its academic program. Each has its own page and its own records."
+    : 'Separate programs run side by side on one site, each with its own page and its own records.';
+  return (
+    <SectionBlock id="campus" title={title} icon="building" items={others} onLayoutY={onLayoutY}
+      renderItem={(o) => (
+        <HubListRow
+          title={o.name}
+          meta={[!schoolOnly && o.role === 'school' ? 'Academic program' : '', o.place, o.years, o.status && o.status !== 'Unknown' ? o.status : '']
+            .filter(Boolean)
+            .join(' | ')}
+          url={o.url || undefined}
+        />
+      )}>
+      <Lead>{lead}</Lead>
+    </SectionBlock>
+  );
+}
+
+/** A program made from a company record keeps the company's published history, at the top of its page. */
+export function ProgramHistorySection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
+  const h = f.history;
+  if (!h?.paragraphs?.length) return null;
+  return (
+    <SectionBlock id="history" title="History" icon="book" onLayoutY={onLayoutY}>
+      {h.paragraphs.map((p, i) => (
+        <Text key={i} style={styles.paragraph}>
+          {cleanProse(p)}
+        </Text>
+      ))}
+      {h.sources?.length ? (
+        <Text style={styles.meta}>
+          {'Sources'}
+          <InlineSources items={h.sources.map((s) => ({ url: s.url, cite: s.label }))} />
+        </Text>
+      ) : null}
+    </SectionBlock>
+  );
+}
+
+/** Federal money the program is on record as taking (Medicaid, child welfare funds, ...), by stream. */
+export function FundingSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
+  const streams = f.federal_funding ?? [];
+  if (!streams.length) return null;
+  return (
+    <SectionBlock id="funding" title="Federal funding" icon="landmark" onLayoutY={onLayoutY}>
+      <Lead>Federal money this program received, as government records, congressional reports and news coverage show it.</Lead>
+      {streams.map((g, i) => (
+        <View key={g.stream || i} style={styles.eraPart}>
+          <SubHead>{g.label}</SubHead>
+          {g.entries.map((e, j) => (
+            <Text key={j} style={styles.body}>
+              {e.years ? <Text style={styles.bold}>{`${e.years}: `}</Text> : null}
+              {cleanProse(e.detail)}
+              <InlineSources items={e.sources.map((s) => ({ url: s.url, cite: s.label }))} />
+            </Text>
+          ))}
+        </View>
+      ))}
+    </SectionBlock>
+  );
+}
+
 export function MemorialsSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
   return (
     <SectionBlock id="memorials" title="Deaths on record" icon="candle" tone="grave" items={f.memorials} onLayoutY={onLayoutY}
@@ -212,4 +290,7 @@ const styles = StyleSheet.create({
   videoText: { padding: 10, gap: spacing.xxs },
   videoTitle: { ...type.cardTitle },
   meta: { ...type.meta },
+  paragraph: { ...type.body, lineHeight: 26 },
+  body: { ...type.body },
+  bold: { ...type.bodyBold },
 });

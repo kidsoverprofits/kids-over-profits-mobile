@@ -191,6 +191,96 @@ export type Era = EraLists & {
 /** A renamed program's page cut into one section per name; `rest` is what no name took, `totals` the whole page's counts. */
 export type FacilityEras = { list?: Era[]; rest?: Partial<EraLists>; totals?: Partial<Record<EraKind, number>> };
 
+/** One sentence of an About and its citations (inc/profile-notes.php; a published write-up keeps its own). */
+export type AboutSentence = { text: string; sources: { url: string; cite: string }[] };
+/**
+ * The record's "About": paragraphs of cited sentences, then "Also drawn on" links. `writeup` is true when it is the
+ * record's published write-up (Claude's About rewrites, inc/about-rewrites.php) rather than prose built from notes.
+ */
+export type About = {
+  paragraphs: AboutSentence[][];
+  also?: { url: string; label: string; cite?: string }[];
+  writeup?: boolean;
+};
+
+/** A survivor's own account on the page: who it is from, where it was published, and (when it names staff) a note. */
+export type TestimonyItem = {
+  text: string;
+  date_label?: string;
+  submitted?: boolean;
+  credit?: string;
+  url?: string;
+  note?: string;
+};
+
+/** What a reader who was there told the questions page, in their own words (inc/reader-accounts.php). */
+export type ReaderQuote = { text: string; credit: string; staff: string[] };
+
+/** A line from the program's own handbook or papers, under its topic (inc/program-practices.php). */
+export type RuleGroup = {
+  topic: string;
+  label: string;
+  lines: { text: string; source_url: string; source_title: string; page: number; year: number }[];
+};
+
+/** One year of the page timeline (inc/profile-timeline.php), oldest first. */
+export type PageTimelineEvent = {
+  kind: string;
+  label: string;
+  group: string;
+  when: string;
+  title: string;
+  lead: string;
+  items: string[];
+  detail: string[];
+  sources: { url: string; cite: string }[];
+  major: boolean;
+};
+export type PageTimelineYear = { year: number; events: PageTimelineEvent[] };
+
+/** An organization's IRS Form 990 filings (inc/nonprofit-filings.php); amounts in dollars, null when not filed. */
+export type NonprofitOrg = {
+  name: string;
+  ein_label: string;
+  place: string;
+  kind: string;
+  since: string;
+  url: string;
+  years: string;
+  filings: { year: number; form: string; revenue: number | null; expenses: number | null; officer_pay: number | null; assets: number | null; pdf: string }[];
+};
+
+/** A company's state business filing (inc/business-filings.php), worded as the website words it. */
+export type BusinessEntity = {
+  name: string;
+  state: string;
+  summary: string;
+  url: string;
+  address: string;
+  officers: { name: string; title: string; where: string }[];
+  more_officers: boolean;
+  agent: { name: string; where: string } | null;
+  events: { date: string; what: string; name: string; notes: string; url: string }[];
+  trade_names: { name: string; note: string }[];
+};
+
+/** Federal money the program is on record as taking, by stream (Medicaid, child welfare funds, ...). */
+export type FundingStream = {
+  stream: string;
+  label: string;
+  entries: { detail: string; years?: string; sources: { url: string; label: string }[] }[];
+};
+
+/** Separate programs on the same campus (inc/campus-programs.php); a program and its school are one too. */
+export type CampusInfo = {
+  /** The campus's own name ("the Cross Creek campus"), or ''. */
+  name?: string;
+  /** role 'school': the academic program of one of them. */
+  others: { id?: number; name: string; url: string; place?: string; status?: string; years?: string; role?: string }[];
+  school_of?: unknown[];
+  schools?: unknown[];
+} | null;
+
 export type FacilityPayload = {
   api_version: number;
   id: number;
@@ -200,6 +290,10 @@ export type FacilityPayload = {
   unique_name: string;
   current_name: string;
   formerly: string[];
+  /** The years beside a past name, keyed by the name (an empty list when none has years). */
+  formerly_years?: Record<string, string> | string[];
+  /** Names the program went by after this record's ("Later called"). */
+  later?: string[];
   aka: string[];
   status: string;
   end_year: string;
@@ -214,6 +308,7 @@ export type FacilityPayload = {
   siblings: Sibling[];
   program_homes: { homes?: { id: number; name: string; home_name?: string; place?: string; status?: string; years?: string; url: string }[] } | null;
   home_of: { count: number; program: { name: string; url: string }; others?: Sibling[] } | null;
+  campus?: CampusInfo;
   addresses: string[];
   former_locations: { line: string; years: string }[];
   operated: string;
@@ -224,8 +319,20 @@ export type FacilityPayload = {
   incidents: Incident[];
   staff: Record<string, StaffEntry[]> | StaffEntry[];
   notes: string[];
+  about?: About | null;
   field_notes: { label: string; text: string }[];
-  testimony: { text: string; date_label?: string; submitted?: boolean }[];
+  testimony: TestimonyItem[];
+  /** Readers' accounts from the questions page: their rules under Rules and practices, the rest under testimony. */
+  readers?: ReaderQuote[];
+  reader_rules?: ReaderQuote[];
+  questions_url?: string;
+  rules?: RuleGroup[];
+  timeline?: PageTimelineYear[];
+  federal_funding?: FundingStream[];
+  nonprofits?: NonprofitOrg[];
+  businesses?: BusinessEntity[];
+  /** A program made from a company record keeps the company's published history. */
+  history?: { status: string; paragraphs: string[]; sources: { label: string; url: string }[] } | null;
   forum: { incidents?: Incident[]; leads?: string[]; links?: { url: string; label: string }[] } | null;
   videos: { provider: string; id: string; title: string; url: string; source: string; thumb: string }[];
   profile_links: Link[];
@@ -278,10 +385,16 @@ export type OperatorPayload = {
   program_tree: (OperatorFacility & { homes: OperatorFacility[] })[];
   open_count: number;
   place_count: number;
+  /** US states and other countries, counted apart (place_count is both). */
+  state_count?: number;
+  country_count?: number;
   lawsuits: LawsuitRow[];
   memorials: MemorialRow[];
   websites: Link[];
   notes: string[];
+  about?: About | null;
+  nonprofits?: NonprofitOrg[];
+  businesses?: BusinessEntity[];
   timeline: { year?: string | number; label?: string; text?: string; url?: string; kind?: string }[];
   people: {
     leaders: { name: string; role: string; career?: unknown[]; personId?: number }[];
@@ -331,11 +444,22 @@ export type AppSuggestItem = {
   status: string;
   slug: string;
   url: string;
+  /** Its other names (the one that matched first) and its other and former places (since 2026-11-13). */
+  names?: string[];
+  places?: string[];
 };
 export type AppSuggestResponse = { query: string; items: AppSuggestItem[] };
 
 /** kop/v1/global-search */
-export type GlobalSearchItem = { title: string; url: string; meta?: string };
+export type GlobalSearchItem = {
+  title: string;
+  url: string;
+  meta?: string;
+  kind?: string;
+  /** Its other names (the one that matched first) and its other and former places, a line each under the result. */
+  names?: string[];
+  places?: string[];
+};
 export type GlobalSearchGroup = { key: string; label: string; items: GlobalSearchItem[] };
 export type GlobalSearchResponse = { query: string; total: number; groups: GlobalSearchGroup[] };
 

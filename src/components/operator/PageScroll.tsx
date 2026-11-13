@@ -2,6 +2,7 @@ import { useMemo, useRef, type ReactNode, type RefObject } from 'react';
 import { ScrollView, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useRefreshControl } from '@/lib/refresh';
 import { colors } from '@/theme/colors';
 import { gutter, maxContentWidth, spacing } from '@/theme/typography';
 
@@ -56,16 +57,23 @@ export function PageFooter({ children }: { children: ReactNode }) {
   return <View style={styles.footer}>{children}</View>;
 }
 
-/** A white page with 16 point gutters, centred and capped in width on tablets. */
-export function PageScroll({ jump, children }: { jump?: PageJump; children: ReactNode }) {
+/** A white page with 16 point gutters, centred and capped in width on tablets; pulled down, it reads `refetch` again. */
+export function PageScroll({ jump, refetch, children }: { jump?: PageJump; refetch?: () => Promise<unknown>; children: ReactNode }) {
+  const refreshControl = useRefreshControl(refetch ?? noRefetch);
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <ScrollView ref={jump?.ref} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        ref={jump?.ref}
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={refetch ? refreshControl : undefined}>
         <View style={styles.column}>{children}</View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+const noRefetch = () => Promise.resolve();
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },

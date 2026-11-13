@@ -15,14 +15,29 @@ import {
   WebsitesSection,
 } from '@/components/operator/Records';
 import { aliasLines, glanceRows, placeLine, sectionsOf, statTiles } from '@/components/operator/model';
-import { GlanceBox, JumpPills, RecordHeader, StatTiles } from '@/components/site';
+import { AboutText, hasAbout } from '@/components/record/About';
+import { BusinessesSection, NonprofitsSection } from '@/components/record/Filings';
+import { GlanceBox, JumpPills, RecordHeader, SectionBlock, StatTiles } from '@/components/site';
 import { ErrorState, Loading, OpenOnSite } from '@/components/ui';
 import { slugFromUrl } from '@/lib/links';
 import { rememberRecent } from '@/lib/recent';
 import { spacing, type } from '@/theme/typography';
 
+/** The company's About (the website's "About <name>"): its notes as cited prose, or its published write-up. */
+function AboutSection({ o }: { o: OperatorPayload }) {
+  if (!hasAbout(o.about)) return null;
+  return (
+    <SectionBlock id="about" title={`About ${o.name}`} icon="book">
+      <AboutText about={o.about} />
+    </SectionBlock>
+  );
+}
+
 const SECTIONS: Record<string, (props: { o: OperatorPayload }) => ReactNode> = {
   history: HistorySection,
+  about: AboutSection,
+  'tax-filings': ({ o }) => <NonprofitsSection orgs={o.nonprofits} who="company" />,
+  'business-filings': ({ o }) => <BusinessesSection entities={o.businesses} who="company" />,
   years: YearSection,
   programs: ProgramsSection,
   people: PeopleSection,
@@ -35,13 +50,13 @@ const SECTIONS: Record<string, (props: { o: OperatorPayload }) => ReactNode> = {
   notes: NotesSection,
 };
 
-function OperatorBody({ o }: { o: OperatorPayload }) {
+function OperatorBody({ o, refetch }: { o: OperatorPayload; refetch: () => Promise<unknown> }) {
   const jump = usePageJump();
   const sections = sectionsOf(o);
   const glance = glanceRows(o);
 
   return (
-    <PageScroll jump={jump}>
+    <PageScroll jump={jump} refetch={refetch}>
       <RecordHeader eyebrow="Parent company profile" title={o.name} aliases={aliasLines(o)} place={placeLine(o)} status={o.status} />
       {o.summary ? <Text style={styles.summary}>{o.summary}</Text> : null}
       <StatTiles tiles={statTiles(o)} onJump={jump.to} />
@@ -90,7 +105,7 @@ export default function OperatorScreen() {
       ) : query.isError ? (
         <ErrorState message={(query.error as Error).message} onRetry={() => query.refetch()} />
       ) : query.data ? (
-        <OperatorBody o={query.data} />
+        <OperatorBody o={query.data} refetch={query.refetch} />
       ) : null}
     </>
   );

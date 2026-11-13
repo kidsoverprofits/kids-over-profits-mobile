@@ -13,18 +13,24 @@ import { InspectionsSection } from '@/components/facility/InspectionsSection';
 import { pageView, presentSections, statTiles, tileAnchor } from '@/components/facility/model';
 import { PracticesSection, StaffSection } from '@/components/facility/PeopleSections';
 import {
-  ErasSection, HomesSection, IncidentsSection, LawsuitsSection, MemorialsSection, NewsSection,
-  SiblingsSection, VideosSection, ViolationsSection,
+  CampusSection, ErasSection, FundingSection, HomesSection, IncidentsSection, LawsuitsSection, MemorialsSection, NewsSection,
+  ProgramHistorySection, SiblingsSection, VideosSection, ViolationsSection,
 } from '@/components/facility/RecordSections';
 import { ResourcesSection } from '@/components/facility/ResourcesSection';
-import { DocumentsSection, ForumSection, NotesSection, TestimonySection, WikiSection } from '@/components/facility/VoiceSections';
+import {
+  AboutSection, DocumentsSection, ForumSection, NotesSection, TestimonySection, WikiSection,
+} from '@/components/facility/VoiceSections';
+import { BusinessesSection, NonprofitsSection } from '@/components/record/Filings';
+import { PageTimelineSection } from '@/components/record/PageTimeline';
 import { ErrorState, Loading } from '@/components/ui';
 import { JumpPills, StatTiles } from '@/components/site';
 import { colors } from '@/theme/colors';
 import { rememberRecent } from '@/lib/recent';
+import { useRefreshControl } from '@/lib/refresh';
 import { gutter, maxContentWidth, spacing } from '@/theme/typography';
 
-function FacilityBody({ f }: { f: FacilityPayload }) {
+function FacilityBody({ f, refetch }: { f: FacilityPayload; refetch: () => Promise<unknown> }) {
+  const refreshControl = useRefreshControl(refetch);
   const scroller = useRef<ScrollView>(null);
   const offsets = useRef<Record<string, number>>({});
   const listY = useRef(0);
@@ -43,7 +49,7 @@ function FacilityBody({ f }: { f: FacilityPayload }) {
 
   return (
     <SafeAreaView style={styles.screen} edges={['bottom']}>
-      <ScrollView ref={scroller} contentContainerStyle={styles.scroll}>
+      <ScrollView ref={scroller} contentContainerStyle={styles.scroll} refreshControl={refreshControl}>
         <View style={styles.column}>
           <HeaderBlock f={f} />
           <Summary text={f.summary} />
@@ -51,24 +57,32 @@ function FacilityBody({ f }: { f: FacilityPayload }) {
           {sections.length > 1 ? <JumpPills items={sections.map((s) => ({ key: s.id, label: s.label }))} onJump={jump} /> : null}
           <Glance f={f} />
           <View onLayout={(e) => { listY.current = e.nativeEvent.layout.y; }}>
-            <ErasSection {...p} />
+            {/* The website's order (templates/facility-page.php). */}
+            <ProgramHistorySection {...p} />
             <HomesSection {...p} />
+            <CampusSection {...p} />
+            <AboutSection {...p} />
+            <NotesSection {...p} />
+            <TestimonySection {...p} />
+            <ForumSection {...p} />
+            <PageTimelineSection years={f.timeline} onLayoutY={onLayoutY} />
+            <ErasSection {...p} />
             <MemorialsSection {...p} />
             <ViolationsSection {...p} />
             <LawsuitsSection {...p} />
+            <FundingSection {...p} />
+            <NonprofitsSection orgs={f.nonprofits} who="program" onLayoutY={onLayoutY} />
+            <BusinessesSection entities={f.businesses} who="program" onLayoutY={onLayoutY} />
             <IncidentsSection {...p} />
             <NewsSection {...p} />
             <VideosSection {...p} />
             <StaffSection {...p} />
             <PracticesSection {...p} />
             <InspectionsSection {...p} />
+            <ConnectionsSection {...p} />
             <DocumentsSection {...p} />
-            <TestimonySection {...p} />
-            <ForumSection {...p} />
-            <NotesSection {...p} />
             <WikiSection {...p} />
             <SiblingsSection {...p} />
-            <ConnectionsSection {...p} />
             <ResourcesSection {...p} />
           </View>
           <ReportingNotice f={f} />
@@ -96,7 +110,7 @@ export default function FacilityScreen() {
       ) : query.isError ? (
         <ErrorState message={(query.error as Error).message} onRetry={() => query.refetch()} />
       ) : query.data ? (
-        <FacilityBody f={query.data} />
+        <FacilityBody f={query.data} refetch={query.refetch} />
       ) : null}
     </>
   );

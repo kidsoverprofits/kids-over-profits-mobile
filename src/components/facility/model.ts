@@ -140,28 +140,42 @@ export function presentSections(page: FacilityPayload): SectionDef[] {
   const forum = f.forum;
   const forumHas = !!(forum && (forum.incidents?.length || forum.leads?.length || forum.links?.length));
   const staff = staffRows(f.staff);
-  const all: [boolean, string, string][] = [
+  const about = f.about;
+  const hasAboutText = !!about && ((about.paragraphs?.length ?? 0) > 0 || (about.also ?? []).some((a) => a.url));
+  const campus = f.campus?.others?.length ?? 0;
+  const pick = (list: [boolean, string, string][]) => list.filter((s) => s[0]).map(([, id, label]) => ({ id, label }));
+  // The website's order (templates/facility-page.php): the record's story first, then each name's section, then the lists.
+  const before = pick([
+    [(f.history?.paragraphs?.length ?? 0) > 0, 'history', 'History'],
     [homes.homes.length > 0, 'homes', homes.isProgram ? 'Homes' : 'Other homes'],
+    [campus > 0, 'campus', 'Same campus'],
+    [hasAboutText || f.field_notes.length > 0, 'about', 'About'],
+    [!hasAboutText && f.notes.length > 0, 'notes', 'Research notes'],
+    [f.testimony.length + (f.readers?.length ?? 0) > 0, 'testimony', 'Survivor testimony'],
+    [forumHas, 'forum', 'Forums'],
+    [(f.timeline?.length ?? 0) > 0, 'timeline', 'Timeline'],
+  ]);
+  const after = pick([
     [f.memorials.length > 0, 'memorials', 'Deaths on record'],
     [violationsOf(f).length > 0, 'violations', 'Serious violations'],
     [f.lawsuits.length > 0, 'lawsuits', 'Lawsuits'],
+    [(f.federal_funding?.length ?? 0) > 0, 'funding', 'Federal funding'],
+    [(f.nonprofits?.length ?? 0) > 0, 'tax-filings', 'Tax filings'],
+    [(f.businesses?.length ?? 0) > 0, 'business-filings', 'Business filings'],
     [f.incidents.length > 0, 'incidents', 'Incidents'],
     [f.news.length > 0, 'news', 'News coverage'],
     [f.videos.length > 0, 'videos', 'Videos'],
     [staff.length > 0, 'staff', 'Staff'],
-    [f.practices.length > 0, 'practices', 'Reported practices'],
+    [f.practices.length > 0 || (f.rules?.length ?? 0) > 0 || (f.reader_rules?.length ?? 0) > 0, 'practices', 'Rules and practices'],
     [!!f.inspections && (!!f.inspections.summary || f.inspections.reports.length > 0 || f.inspections.total > 0), 'inspections', 'Licensing'],
+    [(page.network?.links.length ?? 0) > 0, 'network', 'Connections'],
     [!!f.documents?.url, 'documents', 'Documents'],
-    [f.testimony.length > 0, 'testimony', 'Survivor testimony'],
-    [forumHas, 'forum', 'Forums'],
-    [f.notes.length > 0 || f.field_notes.length > 0, 'notes', 'Research notes'],
     [f.wiki.length > 0, 'wiki', 'Wiki entries'],
     [f.siblings.length > 0, 'related', 'Same operator'],
-    [(page.network?.links.length ?? 0) > 0, 'network', 'Connections'],
     [f.resources.length > 0 || f.profile_links.length > 0 || f.resource_links.length > 0, 'resources', 'Materials and links'],
-  ];
+  ]);
   const names = erasOf(f).map((e) => ({ id: e.id, label: `As ${e.name}` }));
-  return [...names, ...all.filter((s) => s[0]).map(([, id, label]) => ({ id, label }))];
+  return [...before, ...names, ...after];
 }
 
 /** The record in numbers, worst first (template: $kop_fp_tiles). */

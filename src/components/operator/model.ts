@@ -41,7 +41,12 @@ export function glanceRows(o: OperatorPayload): GlanceRow[] {
   if (o.parents?.length) {
     rows.push({ label: o.parents.length > 1 ? 'Parent companies' : 'Parent company', value: o.parents.map((p) => p.name).join('\n') });
   }
-  if (o.place_count > 0) rows.push({ label: 'States and countries', value: String(o.place_count) });
+  // US states and other countries counted apart, as the website's fact box does (place_count before they were split).
+  const states = o.state_count ?? 0;
+  const countries = o.country_count ?? 0;
+  if (states > 0) rows.push({ label: states === 1 ? 'State' : 'States', value: String(states) });
+  if (countries > 0) rows.push({ label: countries === 1 ? 'Country outside the US' : 'Countries outside the US', value: String(countries) });
+  if (!states && !countries && o.place_count > 0) rows.push({ label: 'States and countries', value: String(o.place_count) });
   return rows;
 }
 
@@ -55,10 +60,15 @@ export function statTiles(o: OperatorPayload): StatTile[] {
   ];
 }
 
+/** True when the company's About has something to print. */
+export const aboutOf = (o: OperatorPayload): boolean =>
+  !!o.about && ((o.about.paragraphs?.length ?? 0) > 0 || (o.about.also ?? []).some((a) => a.url));
+
 /** The sections this company has, in page order, for the jump pills. */
 export function sectionsOf(o: OperatorPayload): JumpItem[] {
   const list: [string, string, unknown][] = [
     ['history', 'History', o.history?.paragraphs?.length],
+    ['about', 'About', aboutOf(o)],
     ['years', 'Year by year', o.timeline?.length],
     ['programs', 'Programs', programList(o).length],
     ['people', 'People', peopleList(o).length],
@@ -66,9 +76,12 @@ export function sectionsOf(o: OperatorPayload): JumpItem[] {
     ['news', 'News', o.news?.length],
     ['lawsuits', 'Lawsuits', o.lawsuits?.length],
     ['deaths', 'Deaths', o.memorials?.length],
+    ['tax-filings', 'Tax filings', o.nonprofits?.length],
+    ['business-filings', 'Business filings', o.businesses?.length],
     ['documents', 'Documents', o.documents?.url],
     ['websites', 'Websites', o.websites?.length],
-    ['notes', 'Notes', o.notes?.length],
+    // The notes are the About's prose on the website; the list stays for a company without one.
+    ['notes', 'Notes', aboutOf(o) ? 0 : o.notes?.length],
   ];
   return list.filter(([, , has]) => !!has).map(([key, label]) => ({ key, label }));
 }

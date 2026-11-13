@@ -68,7 +68,7 @@ export default function AdminScreen() {
   };
 
   return (
-    <TabPage>
+    <TabPage refetch={creds ? tools.refetch : undefined}>
       <HubHeader eyebrow="Admin" title="KOP Tools" standfirst={tools.data ? `Signed in as ${tools.data.user}` : undefined} />
       {!creds ? (
         <View style={styles.block}>

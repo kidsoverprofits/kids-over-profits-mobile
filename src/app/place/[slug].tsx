@@ -29,14 +29,14 @@ function counts(data: StatePage): string[] {
   ].filter((p) => !p.startsWith('0 '));
 }
 
-function PlaceBody({ data, slug, country }: { data: StatePage; slug: string; country: boolean }) {
+function PlaceBody({ data, slug, country, refetch }: { data: StatePage; slug: string; country: boolean; refetch: () => Promise<unknown> }) {
   const name = data.state.name;
   const bills = ((data as StatePage & { legislation?: Bill[] }).legislation ?? []).filter((b) => b.bill_title || b.bill_number);
   const { active, closed, total } = data.facilities;
   const reports = data.inspections?.has_reports ? data.inspections.page_url : null;
 
   return (
-    <PageScroll>
+    <PageScroll refetch={refetch}>
       <HubHeader
         eyebrow={country ? 'Country hub' : 'State hub'}
         title={name}
@@ -73,7 +73,7 @@ export default function PlaceScreen() {
       ) : query.isError ? (
         <ErrorState message={(query.error as Error).message} onRetry={() => query.refetch()} />
       ) : query.data ? (
-        <PlaceBody data={query.data} slug={slug} country={country} />
+        <PlaceBody data={query.data} slug={slug} country={country} refetch={query.refetch} />
       ) : null}
     </>
   );

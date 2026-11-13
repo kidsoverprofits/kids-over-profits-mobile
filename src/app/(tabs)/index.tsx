@@ -9,7 +9,7 @@ import { DonateBox } from '@/components/Donate';
 import { Shortcuts, type Shortcut } from '@/components/home/Shortcuts';
 import type { IconName } from '@/components/Icon';
 import { Button, HubBox, HubHeader, HubListRow, SectionBlock } from '@/components/site';
-import { SuggestionList, suggestionHref } from '@/components/Suggestions';
+import { SuggestionList, suggestionHref, previewLines } from '@/components/Suggestions';
 import { Note } from '@/components/tabs/Note';
 import { SearchField } from '@/components/tabs/SearchField';
 import { TabPage } from '@/components/tabs/TabPage';
@@ -111,12 +111,13 @@ export default function HomeScreen() {
   const q = useDebounced(text, 250);
   const suggest = useAppSuggest(q);
   const global = useGlobalSearch(q, more);
+  const news = useNews();
   const short = q.trim().length < SUGGEST_MIN;
   const items = suggest.data?.items ?? [];
   const go = (url: string) => openLink(url, (href) => router.push(href));
 
   return (
-    <TabPage>
+    <TabPage refetch={() => Promise.all([news.refetch(), ...(short ? [] : [suggest.refetch(), global.refetch()])])}>
       <HubHeader
         eyebrow="Kids Over Profits"
         title="Find a program"
@@ -175,7 +176,13 @@ export default function HomeScreen() {
                 title={g.label}
                 icon={GROUP_ICONS[g.key] ?? 'file-text'}
                 items={g.items}
-                renderItem={(it) => <HubListRow title={it.title} meta={it.meta} onPress={() => go(it.url)} />}
+                renderItem={(it) => (
+                  <HubListRow
+                    title={it.title}
+                    meta={[it.meta, ...previewLines(it)].filter(Boolean).join('\n')}
+                    onPress={() => go(it.url)}
+                  />
+                )}
               />
             ))
           )}

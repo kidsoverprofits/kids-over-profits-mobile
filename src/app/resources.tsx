@@ -15,7 +15,7 @@ export default function ResourcesScreen() {
   const data = query.data;
 
   return (
-    <TabPage>
+    <TabPage refetch={query.refetch}>
       <HubHeader
         eyebrow="Where to turn"
         title="Resources"

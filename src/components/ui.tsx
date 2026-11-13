@@ -20,6 +20,7 @@ import { openLink } from '@/lib/links';
 import { cleanProse } from '@/lib/citations';
 import { urlLabel } from '@/lib/urlLabel';
 import { SITE } from '@/api/client';
+import { useRefreshControl } from '@/lib/refresh';
 import { Icon } from './Icon';
 import { InlineSources, type Cite } from './site/Source';
 import { StatusPill } from './site/RecordHeader';
@@ -36,10 +37,22 @@ export function AppText({
 }
 
 /** A scrolling page on the sand background, centred and capped in width on tablets. */
-export function Screen({ children, edges = ['bottom'] }: { children: ReactNode; edges?: ('top' | 'bottom')[] }) {
+const noRefetch = () => Promise.resolve();
+
+export function Screen({
+  children,
+  edges = ['bottom'],
+  refetch,
+}: {
+  children: ReactNode;
+  edges?: ('top' | 'bottom')[];
+  /** Pulled down, the screen reads this again from the live site. */
+  refetch?: () => Promise<unknown>;
+}) {
+  const refreshControl = useRefreshControl(refetch ?? noRefetch);
   return (
     <SafeAreaView style={styles.screen} edges={edges}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" refreshControl={refetch ? refreshControl : undefined}>
         <View style={styles.column}>{children}</View>
       </ScrollView>
     </SafeAreaView>

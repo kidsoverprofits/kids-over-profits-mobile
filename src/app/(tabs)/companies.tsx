@@ -16,6 +16,7 @@ import { ErrorState, Loading } from '@/components/ui';
 import { stateByCode } from '@/data/states';
 import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/typography';
+import { useRefreshControl } from '@/lib/refresh';
 
 type Company = { key: string; slug: string; name: string; line: string; count: number; letter: string };
 
@@ -37,6 +38,7 @@ export default function CompaniesScreen() {
   const list = useRef<FlatList<Company | null>>(null);
   const [filter, setFilter] = useState('');
   const index = useOperators();
+  const refreshControl = useRefreshControl(index.refetch);
   // The list filters by the name shown; the server also finds companies by a past or other name.
   const typed = useDebounced(filter, 250);
   const byOtherName = useAppSuggest(typed, ['operator'], 6);
@@ -97,6 +99,7 @@ export default function CompaniesScreen() {
       ) : (
         <FlatList
           ref={list}
+          refreshControl={refreshControl}
           data={cells}
           numColumns={2}
           keyExtractor={(c, i) => c?.key ?? `empty-${i}`}

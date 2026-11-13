@@ -70,12 +70,12 @@ function Folder({ folder, open: startOpen = false }: { folder: DocFolder; open?:
   );
 }
 
-function Library({ d }: { d: DocumentsPayload }) {
+function Library({ d, refetch }: { d: DocumentsPayload; refetch: () => Promise<unknown> }) {
   const router = useRouter();
   // A library that is one folder and nothing else opens with that folder open.
   const single = d.files.length === 0 && d.folders.length === 1;
   return (
-    <Screen>
+    <Screen refetch={refetch}>
       <AppText variant="eyebrow">Documents on file</AppText>
       <AppText variant="title" style={styles.heading}>{d.name}</AppText>
       <AppText variant="small" muted style={styles.lede}>
@@ -112,7 +112,7 @@ export default function DocumentsScreen() {
       ) : query.isError ? (
         <ErrorState message={(query.error as Error).message} onRetry={() => query.refetch()} />
       ) : query.data ? (
-        <Library d={query.data} />
+        <Library d={query.data} refetch={query.refetch} />
       ) : null}
     </>
   );

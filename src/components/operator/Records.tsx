@@ -10,6 +10,7 @@ import { slugFromUrl } from '@/lib/links';
 import { urlLabel } from '@/lib/urlLabel';
 import { colors } from '@/theme/colors';
 import { spacing, type } from '@/theme/typography';
+import { aboutOf } from './model';
 
 export function NewsSection({ o }: { o: OperatorPayload }) {
   return (
@@ -97,9 +98,10 @@ export function WebsitesSection({ o }: { o: OperatorPayload }) {
   );
 }
 
+/** The research notes as a list, for a company whose notes are not printed as its About. */
 export function NotesSection({ o }: { o: OperatorPayload }) {
   const notes = (o.notes ?? []).map(cleanProse).filter(Boolean);
-  if (!notes.length) return null;
+  if (!notes.length || aboutOf(o)) return null;
   return (
     <SectionBlock id="notes" title="Research notes" icon="lightbulb">
       {notes.map((n, i) => (

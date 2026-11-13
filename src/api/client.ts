@@ -30,8 +30,11 @@ export async function fetchJson<T>(
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   signal?.addEventListener('abort', () => controller.abort());
   try {
+    // 'no-store': every read goes to the live site, never the phone's HTTP cache (the site's answers say max-age=600);
+    // React Query keeps the screens' own copies, and a pull to refresh or a return to the app reads them again.
     const res = await fetch(buildUrl(path, params), {
       headers: { Accept: 'application/json' },
+      cache: 'no-store',
       signal: controller.signal,
     });
     if (!res.ok) {
