@@ -22,6 +22,7 @@ import {
 } from '@/components/facility/VoiceSections';
 import { BusinessesSection, NonprofitsSection } from '@/components/record/Filings';
 import { PageTimelineSection } from '@/components/record/PageTimeline';
+import { OutsideResearchBoxes, ProfileJoined, ProfileSections } from '@/components/record/Profile';
 import { ErrorState, Loading } from '@/components/ui';
 import { JumpPills, StatTiles } from '@/components/site';
 import { colors } from '@/theme/colors';
@@ -53,36 +54,44 @@ function FacilityBody({ f, refetch }: { f: FacilityPayload; refetch: () => Promi
         <View style={styles.column}>
           <HeaderBlock f={f} />
           <Summary text={f.summary} />
+          <OutsideResearchBoxes items={f.outside_research} />
           {tiles.length >= 2 ? <StatTiles tiles={tiles} onJump={(key) => jump(tileAnchor(f, key))} /> : null}
           {sections.length > 1 ? <JumpPills items={sections.map((s) => ({ key: s.id, label: s.label }))} onJump={jump} /> : null}
           <Glance f={f} />
           <View onLayout={(e) => { listY.current = e.nativeEvent.layout.y; }}>
             {/* The website's order (templates/facility-page.php). */}
             <ProgramHistorySection {...p} />
+            <ProfileSections profile={f.profile} onLayoutY={onLayoutY} />
             <HomesSection {...p} />
             <CampusSection {...p} />
             <AboutSection {...p} />
             <NotesSection {...p} />
             <TestimonySection {...p} />
+            <ProfileJoined profile={f.profile} kind="testimony" onLayoutY={onLayoutY} />
             <ForumSection {...p} />
             <PageTimelineSection years={f.timeline} onLayoutY={onLayoutY} />
             <ErasSection {...p} />
             <MemorialsSection {...p} />
             <ViolationsSection {...p} />
             <LawsuitsSection {...p} />
+            <ProfileJoined profile={f.profile} kind="lawsuits" onLayoutY={onLayoutY} />
             <FundingSection {...p} />
             <NonprofitsSection orgs={f.nonprofits} who="program" onLayoutY={onLayoutY} />
             <BusinessesSection entities={f.businesses} who="program" onLayoutY={onLayoutY} />
             <IncidentsSection {...p} />
             <NewsSection {...p} />
+            <ProfileJoined profile={f.profile} kind="news" onLayoutY={onLayoutY} />
             <VideosSection {...p} />
+            <ProfileJoined profile={f.profile} kind="videos" onLayoutY={onLayoutY} />
             <StaffSection {...p} />
             <PracticesSection {...p} />
             <InspectionsSection {...p} />
             <ConnectionsSection {...p} />
             <DocumentsSection {...p} />
+            <ProfileJoined profile={f.profile} kind="documents" onLayoutY={onLayoutY} />
             <WikiSection {...p} />
             <SiblingsSection {...p} />
+            <ProfileJoined profile={f.profile} kind="related" onLayoutY={onLayoutY} />
             <ResourcesSection {...p} />
           </View>
           <ReportingNotice f={f} />

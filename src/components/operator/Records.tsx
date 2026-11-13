@@ -98,6 +98,51 @@ export function WebsitesSection({ o }: { o: OperatorPayload }) {
   );
 }
 
+/** Programs it runs or ran that are not troubled teen programs, by the category they are listed under. */
+export function RelatedSection({ o }: { o: OperatorPayload }) {
+  return (
+    <SectionBlock
+      id="related"
+      title="Related programs"
+      icon="building"
+      items={o.related ?? []}
+      limit={8}
+      renderItem={(r) => (
+        <HubListRow
+          title={r.name}
+          meta={[r.label, r.place, r.status && r.status !== 'Unknown' ? r.status : '', r.past ? 'Ran it in the past' : ''].filter(Boolean).join(' | ') || undefined}
+          url={r.url || undefined}
+        />
+      )}>
+      <Text style={styles.lead}>Programs it runs or ran that are not troubled teen programs, by the category they are listed under.</Text>
+    </SectionBlock>
+  );
+}
+
+/** "Materials and links": the company's links by group, the live site beside an archived one. */
+export function MaterialsSection({ o }: { o: OperatorPayload }) {
+  const groups = (o.resource_links ?? []).filter((g) => g.links?.length);
+  if (!groups.length) return null;
+  return (
+    <SectionBlock id="materials" title="Materials and links" icon="link">
+      {groups.map((g, i) => (
+        <View key={`${g.kind}-${i}`} style={styles.group}>
+          <Text style={styles.subhead}>{g.label}</Text>
+          {g.links.map((l, j) => {
+            const title = l.label && !/^https?:\/\//i.test(l.label) ? l.label : urlLabel(l.url || l.go_url || '');
+            return (
+              <View key={j}>
+                <HubListRow title={title} url={l.url || l.go_url || undefined} />
+                {l.live_url && l.go_url ? <HubListRow title={`${title}: the live site`} url={l.go_url} /> : null}
+              </View>
+            );
+          })}
+        </View>
+      ))}
+    </SectionBlock>
+  );
+}
+
 /** The research notes as a list, for a company whose notes are not printed as its About. */
 export function NotesSection({ o }: { o: OperatorPayload }) {
   const notes = (o.notes ?? []).map(cleanProse).filter(Boolean);
@@ -115,6 +160,9 @@ export function NotesSection({ o }: { o: OperatorPayload }) {
 }
 
 const styles = StyleSheet.create({
+  lead: { ...type.meta },
+  group: { gap: spacing.xs, marginBottom: spacing.sm },
+  subhead: { ...type.label },
   toggle: { alignSelf: 'flex-start', marginTop: spacing.sm, marginLeft: 17 },
   toggleText: { ...type.smallBold, color: colors.tealInk },
   button: { alignSelf: 'flex-start' },

@@ -10,10 +10,13 @@ import {
   DeathsSection,
   DocumentsSection,
   LawsuitsSection,
+  MaterialsSection,
   NewsSection,
   NotesSection,
+  RelatedSection,
   WebsitesSection,
 } from '@/components/operator/Records';
+import { OutsideResearchBoxes } from '@/components/record/Profile';
 import { aliasLines, glanceRows, placeLine, sectionsOf, statTiles } from '@/components/operator/model';
 import { AboutText, hasAbout } from '@/components/record/About';
 import { BusinessesSection, NonprofitsSection } from '@/components/record/Filings';
@@ -40,6 +43,8 @@ const SECTIONS: Record<string, (props: { o: OperatorPayload }) => ReactNode> = {
   'business-filings': ({ o }) => <BusinessesSection entities={o.businesses} who="company" />,
   years: YearSection,
   programs: ProgramsSection,
+  related: RelatedSection,
+  materials: MaterialsSection,
   people: PeopleSection,
   ownership: OwnershipSection,
   news: NewsSection,
@@ -59,6 +64,7 @@ function OperatorBody({ o, refetch }: { o: OperatorPayload; refetch: () => Promi
     <PageScroll jump={jump} refetch={refetch}>
       <RecordHeader eyebrow="Parent company profile" title={o.name} aliases={aliasLines(o)} place={placeLine(o)} status={o.status} />
       {o.summary ? <Text style={styles.summary}>{o.summary}</Text> : null}
+      <OutsideResearchBoxes items={o.outside_research} />
       <StatTiles tiles={statTiles(o)} onJump={jump.to} />
       {sections.length > 1 ? <JumpPills items={sections} onJump={jump.to} /> : null}
       {glance.length ? <GlanceBox rows={glance} /> : null}

@@ -5,23 +5,35 @@ import type { FacilityPayload } from '@/api/types';
 import { colors } from '@/theme/colors';
 import { spacing, type } from '@/theme/typography';
 import { AboutText, hasAbout } from '../record/About';
+import { ResearchList, SourceArchives } from '../record/Archives';
 import { Quote } from '../record/Quote';
 import { Button, HubListRow, SectionBlock, type TimelineItem } from '../site';
 import type { SectionProps } from './model';
 import { Bullets, LimitedTimeline } from './parts';
 
+/** The page has a Documents section: our library, research that names it, or files others hold. */
+export const hasDocuments = (f: FacilityPayload) => !!f.documents?.url || (f.research?.length ?? 0) > 0 || (f.archives?.length ?? 0) > 0;
+
+/**
+ * Documents, as the website lists them: our library (opened in the app), research in our library that names the
+ * program, then the files Unsilenced and survivor sites published that we do not hold.
+ */
 export function DocumentsSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
   const router = useRouter();
-  if (!f.documents?.url) return null;
+  if (!hasDocuments(f)) return null;
   return (
     <SectionBlock id="documents" title="Documents" icon="file-text" onLayoutY={onLayoutY}>
-      <Button
-        variant="secondary"
-        icon="file-text"
-        label="Open the document library"
-        onPress={() => router.push({ pathname: '/documents/[slug]', params: { slug: f.slug, kind: 'facility' } } as Href)}
-        style={styles.button}
-      />
+      {f.documents?.url ? (
+        <Button
+          variant="secondary"
+          icon="file-text"
+          label="Open the document library"
+          onPress={() => router.push({ pathname: '/documents/[slug]', params: { slug: f.slug, kind: 'facility' } } as Href)}
+          style={styles.button}
+        />
+      ) : null}
+      <ResearchList docs={f.research} />
+      <SourceArchives archives={f.archives} />
     </SectionBlock>
   );
 }

@@ -232,6 +232,76 @@ describe('company page', () => {
   });
 });
 
+describe('the rest of the website: profile posts, documents others hold, further research', () => {
+  const withProfile: FacilityPayload = {
+    ...base,
+    outside_research: [{ name: 'Teen Challenge Research Map', url: 'https://example.org/map/x', by: 'A researcher', note: 'Every program on one map.' }],
+    research: [{ title: 'A 2004 report', url: 'https://example.org/r.pdf', byline: 'ISAC', why: 'Lists the program', pages: 'page 12', library: 'https://kidsoverprofits.org/research/' }],
+    archives: [
+      {
+        label: 'Unsilenced', url: 'https://www.unsilenced.org/program-archive/', intro: '2 documents about X that Unsilenced collected.',
+        folders: [{ name: 'X folder', url: 'https://drive.example/f' }],
+        groups: [{ name: '', files: [{ title: 'Intake form', url: 'https://drive.example/1', note: 'Program paper · scan.pdf' }] }],
+      },
+    ],
+    profile: {
+      url: 'https://kidsoverprofits.org/elan/', title: 'Elan School', merged: false, updated: 'Last updated: May 2025',
+      lead: ['Elan opened in 1970. See [the Times](https://example.org/t).'],
+      facts: [{ label: 'Founded', lines: ['1970'] }],
+      sections: [
+        { id: 'abuse', title: 'Abuse at Elan', kind: 'prose', paragraphs: ['• The ring\n• The boards'], links: [] },
+        { id: 'news', title: 'News', kind: 'news', paragraphs: [], links: [{ title: 'A 1990 story', url: 'https://example.org/n', summary: '', outlet: 'example.org' }] },
+      ],
+    },
+  };
+
+  it("shows a hand-written profile post's opening, facts and written sections, and the post's news after the record's", async () => {
+    await show(withProfile);
+    expect(heading('Elan School')).toBeTruthy();
+    expect(screen.getByText(/Elan opened in 1970\./)).toBeTruthy();
+    expect(screen.getByText('the Times')).toBeTruthy();
+    expect(screen.getByText('Founded')).toBeTruthy();
+    expect(heading('Abuse at Elan')).toBeTruthy();
+    expect(screen.getByText(/The ring/)).toBeTruthy();
+    expect(screen.queryByLabelText('News (from our profile)')).toBeTruthy();
+    expect(screen.getByText('A 1990 story')).toBeTruthy();
+    expect(presentSections(withProfile).map((s) => s.id)).toContain('profile');
+  });
+
+  it('lists research naming the program and the files Unsilenced holds under Documents, and the further research box', async () => {
+    await show(withProfile);
+    expect(heading('Documents')).toBeTruthy();
+    expect(screen.getByText('Research that mentions this program')).toBeTruthy();
+    expect(screen.getByText('A 2004 report')).toBeTruthy();
+    expect(screen.getByText('From Unsilenced')).toBeTruthy();
+    expect(screen.getByText('Intake form')).toBeTruthy();
+    expect(screen.getByText('X folder')).toBeTruthy();
+    expect(screen.getByText('Teen Challenge Research Map')).toBeTruthy();
+    expect(screen.getByText('Every program on one map.')).toBeTruthy();
+  });
+
+  it("gives a company page its related programs, materials and further research", async () => {
+    const operator: OperatorPayload = require('./fixtures/operator-1.json');
+    const o: OperatorPayload = {
+      ...operator,
+      related: [{ id: 1, name: 'A Camp', url: 'https://kidsoverprofits.org/facility/a-camp/', label: 'Summer camps', place: 'Utah', status: 'Closed', past: true }],
+      resource_links: [{ kind: 'archive', label: 'Archived pages', links: [{ label: 'Old site', url: 'https://web.archive.org/x', live_url: 'https://x.org', go_url: 'https://x.org' }] }],
+      outside_research: [{ name: 'A research map', url: 'https://example.org/m', by: 'Someone', note: '' }],
+    };
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ slug: '1' });
+    (useOperator as jest.Mock).mockReturnValue({ data: o, isLoading: false, isError: false, error: null, refetch: jest.fn(() => Promise.resolve()) });
+    (useOperatorByName as jest.Mock).mockReturnValue({ data: undefined, isLoading: false, isError: false, error: null, refetch: jest.fn() });
+    await render(<OperatorScreen />);
+    expect(heading('Related programs')).toBeTruthy();
+    expect(screen.getByText('A Camp')).toBeTruthy();
+    expect(screen.getByText('Summer camps | Utah | Closed | Ran it in the past')).toBeTruthy();
+    expect(heading('Materials and links')).toBeTruthy();
+    expect(screen.getByText('Old site')).toBeTruthy();
+    expect(screen.getByText('Old site: the live site')).toBeTruthy();
+    expect(screen.getByText('A research map')).toBeTruthy();
+  });
+});
+
 describe('live reads', () => {
   it('reads the screen again when it is pulled down, and stops spinning when the site answers', async () => {
     const refetch = jest.fn(() => Promise.resolve());

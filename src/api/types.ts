@@ -264,6 +264,43 @@ export type BusinessEntity = {
   trade_names: { name: string; note: string }[];
 };
 
+/** Research by others with a page on the program or company (inc/outside-research.php): "Further research". */
+export type OutsideResearch = { name: string; url: string; by: string; note: string };
+
+/** A document in our research library that names the program, under Documents. */
+export type ResearchDoc = { title: string; url: string; byline: string; why: string; pages: string; library: string };
+
+/** Files about the program that Unsilenced or a survivor site published and KOP does not hold, worded as the website words them. */
+export type SourceArchive = {
+  label: string;
+  url: string;
+  intro: string;
+  folders: { name: string; url: string }[];
+  groups: { name: string; files: { title: string; url: string; note: string }[] }[];
+};
+
+/**
+ * A hand-written Facility Profile post about the program. Paragraph text carries links as [words](address).
+ * `kind` is the record section a post section joins on the website ('testimony', 'news', 'lawsuits', 'documents',
+ * 'videos', 'related'), or 'prose' for its own written sections. `merged`: the website prints it inside the record's
+ * page (Hyde School); otherwise the post is the website's page for the program.
+ */
+export type ProfilePost = {
+  url: string;
+  title: string;
+  merged: boolean;
+  updated: string;
+  lead: string[];
+  facts: { label: string; lines: string[] }[];
+  sections: {
+    id: string;
+    title: string;
+    kind: string;
+    paragraphs: string[];
+    links: { title: string; url: string; summary: string; outlet: string }[];
+  }[];
+};
+
 /** Federal money the program is on record as taking, by stream (Medicaid, child welfare funds, ...). */
 export type FundingStream = {
   stream: string;
@@ -333,6 +370,10 @@ export type FacilityPayload = {
   businesses?: BusinessEntity[];
   /** A program made from a company record keeps the company's published history. */
   history?: { status: string; paragraphs: string[]; sources: { label: string; url: string }[] } | null;
+  research?: ResearchDoc[];
+  archives?: SourceArchive[];
+  outside_research?: OutsideResearch[];
+  profile?: ProfilePost | null;
   forum: { incidents?: Incident[]; leads?: string[]; links?: { url: string; label: string }[] } | null;
   videos: { provider: string; id: string; title: string; url: string; source: string; thumb: string }[];
   profile_links: Link[];
@@ -395,6 +436,10 @@ export type OperatorPayload = {
   about?: About | null;
   nonprofits?: NonprofitOrg[];
   businesses?: BusinessEntity[];
+  /** Programs it runs or ran that are not troubled teen programs, by the category they are listed under. */
+  related?: { id: number; name: string; url: string; label: string; place: string; status: string; past: boolean }[];
+  resource_links?: ResourceLinkGroup[];
+  outside_research?: OutsideResearch[];
   timeline: { year?: string | number; label?: string; text?: string; url?: string; kind?: string }[];
   people: {
     leaders: { name: string; role: string; career?: unknown[]; personId?: number }[];

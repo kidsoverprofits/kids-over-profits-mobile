@@ -145,8 +145,15 @@ export function presentSections(page: FacilityPayload): SectionDef[] {
   const campus = f.campus?.others?.length ?? 0;
   const pick = (list: [boolean, string, string][]) => list.filter((s) => s[0]).map(([, id, label]) => ({ id, label }));
   // The website's order (templates/facility-page.php): the record's story first, then each name's section, then the lists.
+  const profile = f.profile;
+  const profileLead = !!profile && (profile.lead.length > 0 || profile.facts.length > 0);
+  // The post's own written sections (the rest join the record's sections, components/record/Profile.tsx).
+  const joins = ['testimony', 'news', 'lawsuits', 'documents', 'videos', 'related'];
+  const firstProse = profile?.sections.find((s) => !joins.includes(s.kind));
+  const profileAnchor = profileLead ? 'profile' : firstProse ? `profile-${firstProse.id}` : '';
   const before = pick([
     [(f.history?.paragraphs?.length ?? 0) > 0, 'history', 'History'],
+    [profileAnchor !== '', profileAnchor, 'Profile'],
     [homes.homes.length > 0, 'homes', homes.isProgram ? 'Homes' : 'Other homes'],
     [campus > 0, 'campus', 'Same campus'],
     [hasAboutText || f.field_notes.length > 0, 'about', 'About'],
@@ -169,7 +176,7 @@ export function presentSections(page: FacilityPayload): SectionDef[] {
     [f.practices.length > 0 || (f.rules?.length ?? 0) > 0 || (f.reader_rules?.length ?? 0) > 0, 'practices', 'Rules and practices'],
     [!!f.inspections && (!!f.inspections.summary || f.inspections.reports.length > 0 || f.inspections.total > 0), 'inspections', 'Licensing'],
     [(page.network?.links.length ?? 0) > 0, 'network', 'Connections'],
-    [!!f.documents?.url, 'documents', 'Documents'],
+    [!!f.documents?.url || (f.research?.length ?? 0) > 0 || (f.archives?.length ?? 0) > 0, 'documents', 'Documents'],
     [f.wiki.length > 0, 'wiki', 'Wiki entries'],
     [f.siblings.length > 0, 'related', 'Same operator'],
     [f.resources.length > 0 || f.profile_links.length > 0 || f.resource_links.length > 0, 'resources', 'Materials and links'],

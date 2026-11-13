@@ -71,6 +71,7 @@ export function sectionsOf(o: OperatorPayload): JumpItem[] {
     ['about', 'About', aboutOf(o)],
     ['years', 'Year by year', o.timeline?.length],
     ['programs', 'Programs', programList(o).length],
+    ['related', 'Related programs', o.related?.length],
     ['people', 'People', peopleList(o).length],
     ['ownership', 'Ownership', (o.parents?.length ?? 0) + (o.subsidiaries?.length ?? 0)],
     ['news', 'News', o.news?.length],
@@ -79,6 +80,7 @@ export function sectionsOf(o: OperatorPayload): JumpItem[] {
     ['tax-filings', 'Tax filings', o.nonprofits?.length],
     ['business-filings', 'Business filings', o.businesses?.length],
     ['documents', 'Documents', o.documents?.url],
+    ['materials', 'Materials and links', (o.resource_links ?? []).some((g) => g.links?.length)],
     ['websites', 'Websites', o.websites?.length],
     // The notes are the About's prose on the website; the list stays for a company without one.
     ['notes', 'Notes', aboutOf(o) ? 0 : o.notes?.length],
