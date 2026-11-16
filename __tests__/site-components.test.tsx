@@ -40,6 +40,28 @@ describe('PersonCard', () => {
     expect(screen.getByText('Show fewer −')).toBeTruthy();
   });
 
+  it('puts noteworthy jobs outside the industry under their own heading, after the industry', async () => {
+    const entry = {
+      name: 'Pat Example',
+      role: 'Director',
+      career: [
+        { place: 'Utah State Senate', role: 'Senator', kind: 'other' },
+        { place: 'Sunrise Academy', role: 'Therapist', kind: 'industry' },
+      ],
+    };
+    await render(<PersonCard entry={entry} />);
+    expect(screen.getByText('Elsewhere in the industry')).toBeTruthy();
+    expect(screen.getByText('Other notable positions')).toBeTruthy();
+    const tree = JSON.stringify(screen.toJSON());
+    expect(tree.indexOf('Sunrise Academy')).toBeLessThan(tree.indexOf('Other notable positions'));
+    expect(tree.indexOf('Other notable positions')).toBeLessThan(tree.indexOf('Utah State Senate'));
+  });
+
+  it('shows one heading when every job is in the industry', async () => {
+    await render(<PersonCard entry={bobbie} />);
+    expect(screen.queryByText('Other notable positions')).toBeNull();
+  });
+
   it('links the citation with its words as the label', async () => {
     await render(<PersonCard entry={bobbie} />);
     // Woodbury wording is dropped from the label, leaving "source"

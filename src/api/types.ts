@@ -64,7 +64,7 @@ export type StaffEntry = {
   url?: string;
   name?: string;
   role?: string;
-  career?: { text?: string; label?: string; name?: string; url?: string; role?: string; place?: string; years?: string }[];
+  career?: { text?: string; label?: string; name?: string; url?: string; role?: string; place?: string; years?: string; kind?: string }[];
   from_map?: boolean;
 };
 

@@ -9,7 +9,8 @@ import { dense, hitSlopFor } from './metrics';
 import { SourceLink } from './Source';
 import { useOpenLink } from './useOpenLink';
 
-export type Job = { text?: string; label?: string; name?: string; url?: string; role?: string; place?: string; years?: string };
+/** kind: 'industry' or 'other' (a noteworthy position outside the industry), from the site's kop_facility_pages_job_kind(). */
+export type Job = { text?: string; label?: string; name?: string; url?: string; role?: string; place?: string; years?: string; kind?: string };
 
 /** A staff entry (facility pages) or a person on a company page. */
 export type PersonEntry = {
@@ -23,6 +24,14 @@ export type PersonEntry = {
 };
 
 const JOBS_SHOWN = 4;
+
+/** The website's two career headings (kop_facility_pages_career_groups()). */
+const GROUPS = [
+  { kind: 'industry', label: 'Elsewhere in the industry' },
+  { kind: 'other', label: 'Other notable positions' },
+] as const;
+
+const isOther = (j: Job) => j.kind === 'other';
 
 function jobsOf(entry: PersonEntry): Job[] {
   return (entry.career ?? [])
@@ -47,7 +56,9 @@ function jobDetail(j: Job): string {
 export function PersonCard({ entry, style }: { entry: PersonEntry; style?: StyleProp<ViewStyle> }) {
   const open = useOpenLink();
   const [all, setAll] = useState(false);
-  const jobs = jobsOf(entry);
+  // Industry jobs first, then the other positions, as the website lists them; "N more" counts across both.
+  const listed = jobsOf(entry);
+  const jobs = [...listed.filter((j) => !isOther(j)), ...listed.filter(isOther)];
   const named = !!entry.name;
   const role = named ? roleLine(entry.role) : '';
   const shownJobs = all ? jobs : jobs.slice(0, JOBS_SHOWN);
@@ -64,24 +75,32 @@ export function PersonCard({ entry, style }: { entry: PersonEntry; style?: Style
       {cited ? <SourceLink items={[entry]} /> : null}
       {jobs.length ? (
         <View style={styles.career}>
-          <Text {...dense} style={styles.kicker}>Elsewhere in the industry</Text>
-          {shownJobs.map((j, i) => {
-            const place = jobPlace(j);
-            const detail = jobDetail(j);
+          {GROUPS.map(({ kind, label }) => {
+            const group = shownJobs.filter((j) => (kind === 'other') === isOther(j));
+            if (!group.length) return null;
             return (
-              <View key={`${place}-${i}`} style={styles.job}>
-                {j.url ? (
-                  <Pressable
-                    onPress={() => open(j.url)}
-                    accessibilityRole="link"
-                    accessibilityLabel={detail ? `${place}, ${detail}` : place}
-                    hitSlop={hitSlopFor(type.smallBold.lineHeight!)}>
-                    <Text {...dense} style={styles.place}>{place}</Text>
-                  </Pressable>
-                ) : (
-                  <Text {...dense} style={styles.place}>{place}</Text>
-                )}
-                {detail ? <Text {...dense} style={styles.detail}>{detail}</Text> : null}
+              <View key={kind} style={styles.group}>
+                <Text {...dense} style={styles.kicker}>{label}</Text>
+                {group.map((j, i) => {
+                  const place = jobPlace(j);
+                  const detail = jobDetail(j);
+                  return (
+                    <View key={`${place}-${i}`} style={styles.job}>
+                      {j.url ? (
+                        <Pressable
+                          onPress={() => open(j.url)}
+                          accessibilityRole="link"
+                          accessibilityLabel={detail ? `${place}, ${detail}` : place}
+                          hitSlop={hitSlopFor(type.smallBold.lineHeight!)}>
+                          <Text {...dense} style={styles.place}>{place}</Text>
+                        </Pressable>
+                      ) : (
+                        <Text {...dense} style={styles.place}>{place}</Text>
+                      )}
+                      {detail ? <Text {...dense} style={styles.detail}>{detail}</Text> : null}
+                    </View>
+                  );
+                })}
               </View>
             );
           })}
@@ -117,6 +136,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs + 2,
     alignItems: 'flex-start',
   },
+  group: { gap: spacing.xs + 2, alignItems: 'flex-start' },
   kicker: { ...type.kicker, color: colors.tealInk },
   job: { gap: 0 },
   place: { ...type.smallBold, color: colors.navy },
