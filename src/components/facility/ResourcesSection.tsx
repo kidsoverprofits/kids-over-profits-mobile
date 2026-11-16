@@ -1,33 +1,25 @@
+import { StyleSheet, Text, View } from 'react-native';
+
 import type { FacilityPayload } from '@/api/types';
 import { urlLabel } from '@/lib/urlLabel';
+import { colors } from '@/theme/colors';
 import { HubListRow, SectionBlock } from '../site';
 import type { SectionProps } from './model';
-import { Lead, SubHead } from './parts';
+import { SubHead } from './parts';
 
-type Row = { title: string; url?: string; meta?: string; head?: string; lead?: string };
+type Row = { title: string; url?: string; meta?: string; head?: string; held?: string[] };
 
 /** The words for a link, never its address. */
 const words = (label: string | undefined, url: string) => (label && !/^https?:\/\//i.test(label) ? label : urlLabel(url));
 
 /**
- * The materials the project holds, by group (not online, so no links), then the program's own links,
- * then each group of research links under its sub-head (template: the 'resources' section).
+ * The materials the project holds as one row of small ticked boxes (not online, so no links), then the program's own
+ * links, then each group of research links under its sub-head (template: the 'resources' section, .kop-fp-held).
  */
 export function ResourcesSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
   const rows: Row[] = [];
-  const groups = new Map<string, FacilityPayload['resources']>();
-  for (const r of f.resources ?? []) {
-    if (!groups.has(r.group)) groups.set(r.group, []);
-    groups.get(r.group)!.push(r);
-  }
-  for (const [group, items] of groups) {
-    items.forEach((r, i) => rows.push({
-      title: r.label,
-      meta: r.detail || undefined,
-      head: i === 0 ? group : undefined,
-      lead: rows.length === 0 ? 'Materials the project holds for this facility. Ask through the Send tab to see any of them.' : undefined,
-    }));
-  }
+  const held = (f.resources ?? []).map((r) => (r.label === 'Note' && r.detail ? r.detail : r.label));
+  if (held.length) rows.push({ title: '', held });
   f.profile_links
     .map((l) => ({ url: l.url || l.go_url || '', label: l.label }))
     .filter((l) => l.url)
@@ -41,11 +33,31 @@ export function ResourcesSection({ f, onLayoutY }: SectionProps & { f: FacilityP
     <SectionBlock id="resources" title="Materials and links" icon="link" items={rows} limit={8} onLayoutY={onLayoutY}
       renderItem={(r, i) => (
         <>
-          {r.lead ? <Lead>{r.lead}</Lead> : null}
           {r.head ? <SubHead first={i === 0}>{r.head}</SubHead> : null}
-          <HubListRow title={r.title} meta={r.meta} url={r.url} />
+          {r.held ? (
+            <View style={styles.held} accessibilityLabel="Materials the project holds">
+              {r.held.map((label, j) => (
+                <View key={j} style={styles.heldItem}>
+                  <Text style={styles.box} accessibilityElementsHidden importantForAccessibility="no">{'✓'}</Text>
+                  <Text style={styles.heldText}>{label}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <HubListRow title={r.title} meta={r.meta} url={r.url} />
+          )}
         </>
       )}
     />
   );
 }
+
+const styles = StyleSheet.create({
+  held: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 16, rowGap: 6, marginBottom: 12 },
+  heldItem: { flexDirection: 'row', alignItems: 'center', gap: 6, maxWidth: '100%' },
+  box: {
+    width: 16, height: 16, borderWidth: 1, borderColor: colors.tealInk, borderRadius: 2, backgroundColor: colors.white,
+    color: colors.tealInk, fontSize: 11, lineHeight: 14, fontWeight: '700', textAlign: 'center',
+  },
+  heldText: { fontSize: 14, lineHeight: 20, color: colors.textPrimary, flexShrink: 1 },
+});

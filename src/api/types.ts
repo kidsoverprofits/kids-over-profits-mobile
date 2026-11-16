@@ -66,6 +66,8 @@ export type StaffEntry = {
   role?: string;
   career?: { text?: string; label?: string; name?: string; url?: string; role?: string; place?: string; years?: string; kind?: string }[];
   from_map?: boolean;
+  /** Family, business partners (the site's kop-fp-person-relations line). */
+  relations?: { kind?: string; name?: string; url?: string }[];
 };
 
 export type Incident = {

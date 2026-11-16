@@ -51,7 +51,12 @@ export function staffRows(staff: FacilityPayload['staff']): StaffRow[] {
   };
   groups.sort((a, b) => rank(a[0]) - rank(b[0]));
   const rows: StaffRow[] = [];
-  for (const [key, entries] of groups) {
+  for (const [key, all] of groups) {
+    // As the site: people with nothing else on record (no other job, no relation) go after the rest, where the
+    // section's "more" button holds them (templates/facility-page.php, Claude note #15).
+    const linked = all.filter((e) => e.career?.length || e.relations?.length);
+    const alone = all.filter((e) => !(e.career?.length || e.relations?.length));
+    const entries = linked.length && alone.length >= 4 ? [...linked, ...alone] : all;
     const head = key ? (STAFF_LABELS[key] ?? key.replace(/([A-Z])/g, ' $1').replace(/^./, (c) => c.toUpperCase())) : undefined;
     entries.forEach((entry, i) => rows.push({ entry, head: i === 0 ? head : undefined }));
   }

@@ -193,15 +193,13 @@ describe('sources on the alias lines', () => {
 });
 
 describe('materials and links: what the project holds, as on the website', () => {
-  it('lists the held materials under their groups, with their details, before the links', async () => {
+  it('shows the held materials as one row of small ticked boxes, before the links (Claude note #18)', async () => {
     await show(provo);
     expect(provo.resources.length).toBeGreaterThan(0);
-    for (const more of screen.queryAllByLabelText(/^Show \d+ more$/)) await fireEvent.press(more);
-    expect(screen.getByText(/^Materials the project holds for this facility/)).toBeTruthy();
-    for (const g of new Set(provo.resources.map((r) => r.group))) expect(screen.getAllByText(g).length).toBeGreaterThan(0);
+    expect(screen.getByLabelText('Materials the project holds')).toBeTruthy();
+    expect(screen.queryByText(/^Materials the project holds for this facility/)).toBeNull();
     for (const r of provo.resources) {
-      expect(screen.getAllByText(r.label).length).toBeGreaterThan(0);
-      if (r.detail) expect(screen.getAllByText(r.detail).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(r.label === 'Note' && r.detail ? r.detail : r.label).length).toBeGreaterThan(0);
     }
   });
 
