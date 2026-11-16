@@ -57,7 +57,7 @@ function FacilityBody({ f, refetch }: { f: FacilityPayload; refetch: () => Promi
           <OutsideResearchBoxes items={f.outside_research} />
           {tiles.length >= 2 ? <StatTiles tiles={tiles} onJump={(key) => jump(tileAnchor(f, key))} /> : null}
           {sections.length > 1 ? <JumpPills items={sections.map((s) => ({ key: s.id, label: s.label }))} onJump={jump} /> : null}
-          <Glance f={f} />
+          <Glance f={f} onJump={jump} />
           <View onLayout={(e) => { listY.current = e.nativeEvent.layout.y; }}>
             {/* The website's order (templates/facility-page.php). */}
             <ProgramHistorySection {...p} />

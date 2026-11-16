@@ -1,13 +1,16 @@
-import { Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import type { FacilityPayload } from '@/api/types';
 import { colors } from '@/theme/colors';
 import { type } from '@/theme/typography';
 import { GlanceBox, useOpenLink, type GlanceRow } from '../site';
-import { factText } from './model';
+import { factText, presentSections } from './model';
 
-/** "At a glance": addresses, former locations, then every fact with its sources; the operator links to its page. */
-export function Glance({ f }: { f: FacilityPayload }) {
+/**
+ * "At a glance": addresses, former locations, then every fact with its sources; the operator links to its page.
+ * Last, the materials the project holds as small ticked boxes, each jumping to its section (website: .kop-fp-held).
+ */
+export function Glance({ f, onJump }: { f: FacilityPayload; onJump?: (key: string) => void }) {
   const open = useOpenLink();
   const rows: GlanceRow[] = [];
   if (f.addresses.length) {
@@ -44,5 +47,41 @@ export function Glance({ f }: { f: FacilityPayload }) {
       rows.push({ label: fact.label, value: text, sources });
     }
   }
+  const held = f.resources ?? [];
+  if (held.length) {
+    const shown = new Set(presentSections(f).map((s) => s.id));
+    rows.push({
+      label: 'Materials held',
+      value: (
+        <View style={styles.held} accessibilityLabel="Materials the project holds">
+          {held.map((r, j) => {
+            const label = r.label === 'Note' && r.detail ? r.detail : r.label;
+            const to = (r.anchors ?? []).find((a) => shown.has(a));
+            return (
+              <View key={j} style={styles.heldItem}>
+                <Text style={styles.box} accessibilityElementsHidden importantForAccessibility="no">{'✓'}</Text>
+                {to && onJump ? (
+                  <Text style={[styles.heldText, styles.link]} accessibilityRole="link" onPress={() => onJump(to)}>{label}</Text>
+                ) : (
+                  <Text style={styles.heldText}>{label}</Text>
+                )}
+              </View>
+            );
+          })}
+        </View>
+      ),
+    });
+  }
   return <GlanceBox rows={rows} />;
 }
+
+const styles = StyleSheet.create({
+  held: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 14, rowGap: 6 },
+  heldItem: { flexDirection: 'row', alignItems: 'center', gap: 6, maxWidth: '100%' },
+  box: {
+    width: 16, height: 16, borderWidth: 1, borderColor: colors.tealInk, borderRadius: 2, backgroundColor: colors.white,
+    color: colors.tealInk, fontSize: 11, lineHeight: 14, fontWeight: '700', textAlign: 'center',
+  },
+  heldText: { fontSize: 14, lineHeight: 20, color: colors.textPrimary, flexShrink: 1 },
+  link: { color: colors.navy, textDecorationLine: 'underline' },
+});

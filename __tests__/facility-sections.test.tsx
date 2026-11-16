@@ -193,19 +193,27 @@ describe('sources on the alias lines', () => {
 });
 
 describe('materials and links: what the project holds, as on the website', () => {
-  it('shows the held materials as one row of small ticked boxes, before the links (Claude note #18)', async () => {
+  it('ticks the held materials under At a glance, each one a link to its section (Claude note #18)', async () => {
     await show(provo);
     expect(provo.resources.length).toBeGreaterThan(0);
     expect(screen.getByLabelText('Materials the project holds')).toBeTruthy();
-    expect(screen.queryByText(/^Materials the project holds for this facility/)).toBeNull();
+    expect(screen.getByText('Materials held')).toBeTruthy();
     for (const r of provo.resources) {
       expect(screen.getAllByText(r.label === 'Note' && r.detail ? r.detail : r.label).length).toBeGreaterThan(0);
     }
   });
 
-  it('has the section and its jump pill even with no links at all', async () => {
+  it('has no Materials and links section with no links, the held materials still ticked under At a glance', async () => {
     const heldOnly = { ...provo, profile_links: [], resource_links: [] };
     await show(heldOnly);
-    expect(screen.getByLabelText('Jump to Materials and links')).toBeTruthy();
+    expect(screen.queryByLabelText('Jump to Materials and links')).toBeNull();
+    expect(screen.getByText('Materials held')).toBeTruthy();
+  });
+
+  it('links a held material to the first section of its anchors that the page shows', async () => {
+    const linked = { ...provo, resources: [{ label: 'News articles', group: 'News and media', detail: '', key: 'hasNews', anchors: ['news', 'documents', 'resources'] }] };
+    await show(linked);
+    const link = screen.getByText('News articles');
+    expect(link.props.accessibilityRole).toBe('link');
   });
 });

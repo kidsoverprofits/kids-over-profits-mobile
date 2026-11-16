@@ -164,7 +164,15 @@ export type SeriousFinding = {
 export type Sibling = { name: string; place: string; status: string; url: string };
 
 /** A kind of material the project holds for the record, not online (kop_facility_pages_resources_held()). */
-export type HeldResource = { label: string; group: string; detail: string };
+export type HeldResource = {
+  label: string;
+  group: string;
+  detail: string;
+  /** The resources.* flag ("hasLawsuits"); empty for a custom entry or a note. */
+  key?: string;
+  /** Page sections it links to under "At a glance", best first (kop_facility_pages_resource_anchors()). */
+  anchors?: string[];
+};
 
 export type ResourceLinkGroup = { kind: string; label: string; links: Link[] };
 

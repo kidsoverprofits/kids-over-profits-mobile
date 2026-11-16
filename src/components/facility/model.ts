@@ -184,7 +184,7 @@ export function presentSections(page: FacilityPayload): SectionDef[] {
     [!!f.documents?.url || (f.research?.length ?? 0) > 0 || (f.archives?.length ?? 0) > 0, 'documents', 'Documents'],
     [f.wiki.length > 0, 'wiki', 'Wiki entries'],
     [f.siblings.length > 0, 'related', 'Same operator'],
-    [f.resources.length > 0 || f.profile_links.length > 0 || f.resource_links.length > 0, 'resources', 'Materials and links'],
+    [f.profile_links.length > 0 || f.resource_links.length > 0, 'resources', 'Materials and links'],
   ]);
   const names = erasOf(f).map((e) => ({ id: e.id, label: `As ${e.name}` }));
   return [...before, ...names, ...after];
