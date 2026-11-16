@@ -21,7 +21,8 @@
             ],
             "years": "Founded 2005",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 3,
@@ -38,7 +39,8 @@
             ],
             "years": "Programs from 2004",
             "status": "Active",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 14162,
@@ -52,7 +54,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 2,
@@ -66,7 +69,8 @@
             ],
             "years": "Programs from 1989",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 7,
@@ -97,7 +101,8 @@
             ],
             "years": "Founded 1997",
             "status": "Acquired",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 5649,
@@ -111,7 +116,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 1,
@@ -126,7 +132,8 @@
             ],
             "years": "Founded 1967",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 5708,
@@ -140,7 +147,8 @@
             ],
             "years": "",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 500001,
@@ -152,7 +160,8 @@
             "places": [],
             "years": "",
             "status": "unknown",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 5,
@@ -166,7 +175,8 @@
             ],
             "years": "Programs from 2002",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 11244,
@@ -180,7 +190,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 31,
@@ -196,7 +207,8 @@
             ],
             "years": "Founded 1987",
             "status": "Acquired",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 14161,
@@ -210,7 +222,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 8,
@@ -232,7 +245,8 @@
             ],
             "years": "Programs from 1948",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 5748,
@@ -246,7 +260,8 @@
             ],
             "years": "",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 9,
@@ -267,7 +282,8 @@
             ],
             "years": "Programs from 1977",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 10,
@@ -291,7 +307,8 @@
             ],
             "years": "Programs from 1995",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 11,
@@ -305,7 +322,8 @@
             ],
             "years": "Programs from 2014",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 12,
@@ -325,7 +343,8 @@
             ],
             "years": "Founded 2008",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 5418,
@@ -339,7 +358,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": false
         },
         {
             "id": 5834,
@@ -353,7 +373,8 @@
             ],
             "years": "",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 35,
@@ -368,7 +389,8 @@
             ],
             "years": "Founded 1973",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 6873,
@@ -382,7 +404,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 14,
@@ -400,7 +423,8 @@
             ],
             "years": "Programs from 1984",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 500004,
@@ -414,7 +438,8 @@
             ],
             "years": "Programs from 1989",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 15,
@@ -428,7 +453,8 @@
             ],
             "years": "",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 5454,
@@ -442,7 +468,8 @@
             ],
             "years": "",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 5455,
@@ -456,7 +483,8 @@
             ],
             "years": "",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 16,
@@ -476,7 +504,8 @@
             ],
             "years": "Programs from 2009",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 6006,
@@ -490,7 +519,8 @@
             ],
             "years": "",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 33,
@@ -502,7 +532,8 @@
             "places": [],
             "years": "",
             "status": "Acquired",
-            "major": false
+            "major": false,
+            "active": false
         },
         {
             "id": 500005,
@@ -536,7 +567,8 @@
             ],
             "years": "Founded 1988",
             "status": "Acquired",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 7569,
@@ -550,7 +582,8 @@
             ],
             "years": "",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 832,
@@ -572,7 +605,8 @@
             ],
             "years": "Programs from 1987",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 17,
@@ -589,7 +623,8 @@
             ],
             "years": "Programs from 1967",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 20,
@@ -619,7 +654,8 @@
             ],
             "years": "Founded 1999",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 500002,
@@ -631,7 +667,8 @@
             "places": [],
             "years": "",
             "status": "unknown",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 21,
@@ -653,7 +690,8 @@
             ],
             "years": "Programs from 1976",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 500000,
@@ -667,7 +705,8 @@
             ],
             "years": "Programs from 1974",
             "status": "",
-            "major": false
+            "major": false,
+            "active": true
         },
         {
             "id": 22,
@@ -698,7 +737,8 @@
             ],
             "years": "Programs from 1958",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 4,
@@ -719,7 +759,8 @@
             ],
             "years": "Programs from 1923",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 24,
@@ -742,7 +783,8 @@
             ],
             "years": "Programs from 1976",
             "status": "Merged",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 23,
@@ -756,7 +798,8 @@
             ],
             "years": "",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 25,
@@ -793,7 +836,8 @@
             ],
             "years": "Programs from 1940",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 26,
@@ -811,7 +855,8 @@
             ],
             "years": "Programs from 2013",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 27,
@@ -825,7 +870,8 @@
             ],
             "years": "Programs from 2016",
             "status": "",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 29,
@@ -855,7 +901,8 @@
             ],
             "years": "Programs from 1978",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 28,
@@ -871,7 +918,8 @@
             ],
             "years": "",
             "status": "Active",
-            "major": true
+            "major": true,
+            "active": true
         },
         {
             "id": 30,
@@ -888,7 +936,8 @@
             ],
             "years": "Founded 1992",
             "status": "Defunct",
-            "major": true
+            "major": true,
+            "active": false
         },
         {
             "id": 500003,
@@ -900,7 +949,8 @@
             "places": [],
             "years": "",
             "status": "unknown",
-            "major": false
+            "major": false,
+            "active": true
         }
     ]
 }

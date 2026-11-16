@@ -9,6 +9,7 @@ import { CompanyTile, HubHeader } from '@/components/site';
 import { SuggestionList, suggestionHref } from '@/components/Suggestions';
 import { AlphabetBar } from '@/components/tabs/AlphabetBar';
 import { Note } from '@/components/tabs/Note';
+import { Pill } from '@/components/tabs/Pill';
 import { SearchField } from '@/components/tabs/SearchField';
 import { useDebounced } from '@/components/tabs/useDebounced';
 import { pageColumn } from '@/components/tabs/TabPage';
@@ -18,7 +19,14 @@ import { colors } from '@/theme/colors';
 import { spacing } from '@/theme/typography';
 import { useRefreshControl } from '@/lib/refresh';
 
-type Company = { key: string; slug: string; name: string; line: string; count: number; letter: string };
+type Company = { key: string; slug: string; name: string; line: string; count: number; letter: string; active: boolean };
+
+/** As /operator/: operating companies, then those closed, merged or acquired. */
+const GROUPS = [
+  { key: 'active', label: 'Operating', noun: 'operating' },
+  { key: 'closed', label: 'Closed, merged or acquired', noun: 'closed, merged or acquired' },
+] as const;
+type Group = (typeof GROUPS)[number]['key'];
 
 const letterOf = (name: string) => {
   const c = name.trim().charAt(0).toUpperCase();
@@ -37,6 +45,7 @@ export default function CompaniesScreen() {
   const router = useRouter();
   const list = useRef<FlatList<Company | null>>(null);
   const [filter, setFilter] = useState('');
+  const [group, setGroup] = useState<Group>('active');
   const index = useOperators();
   const refreshControl = useRefreshControl(index.refetch);
   // The list filters by the name shown; the server also finds companies by a past or other name.
@@ -46,19 +55,21 @@ export default function CompaniesScreen() {
   const companies = useMemo<Company[]>(
     () =>
       (index.data?.items ?? [])
-        .map((c) => ({ key: String(c.id), slug: c.slug, name: c.name, line: describe(c), count: c.programs, letter: letterOf(c.name) }))
+        .map((c) => ({ key: String(c.id), slug: c.slug, name: c.name, line: describe(c), count: c.programs, letter: letterOf(c.name), active: c.active !== false }))
         .sort((a, b) => a.name.localeCompare(b.name)),
     [index.data],
   );
 
-  const shown = companies.filter((c) => c.name.toLowerCase().includes(filter.trim().toLowerCase()));
+  const inGroup = companies.filter((c) => c.active === (group === 'active'));
+  const shown = inGroup.filter((c) => c.name.toLowerCase().includes(filter.trim().toLowerCase()));
   // Two columns: an odd last company gets an empty cell so its tile keeps the column width.
   const cells: (Company | null)[] = shown.length % 2 ? [...shown, null] : shown;
   const letters = [...new Set(shown.map((c) => c.letter))];
-  const total = companies.length;
+  const total = inGroup.length;
+  const noun = GROUPS.find((g) => g.key === group)?.noun ?? '';
   const listed = new Set(shown.map((c) => c.slug));
   const extra = filter.trim() ? (byOtherName.data?.items ?? []).filter((i) => i.slug && !listed.has(i.slug)) : [];
-  const count = `${shown.length === total ? '' : `${shown.length} of `}${total} ${total === 1 ? 'company' : 'companies'}`;
+  const count = `${shown.length === total ? '' : `${shown.length} of `}${total} ${noun} ${total === 1 ? 'company' : 'companies'}`;
 
   const jump = (letter: string) => {
     const at = shown.findIndex((c) => c.letter === letter);
@@ -71,8 +82,19 @@ export default function CompaniesScreen() {
         eyebrow="Directory"
         title="Parent companies"
         standfirst="The companies that own and run troubled teen programs."
-        counts={total ? [count] : []}
+        counts={companies.length ? [count] : []}
       />
+      <View style={styles.groups}>
+        {GROUPS.map((g) => (
+          <Pill
+            key={g.key}
+            label={`${g.label} (${companies.filter((c) => c.active === (g.key === 'active')).length})`}
+            accessibilityLabel={`Show ${g.noun} companies`}
+            selected={group === g.key}
+            onPress={() => setGroup(g.key)}
+          />
+        ))}
+      </View>
       <SearchField value={filter} onChangeText={setFilter} placeholder="Filter companies, or an old name" label="Filter the list of companies, including former names" />
       {extra.length ? (
         <View style={styles.extra}>
@@ -137,6 +159,7 @@ const Gap = () => <View style={styles.gap} />;
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.white },
   header: { marginBottom: spacing.md },
+  groups: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
   extra: { marginTop: spacing.md, gap: spacing.xs },
   columns: { gap: spacing.md - 4 },
   cell: { flex: 1, minWidth: 0 },

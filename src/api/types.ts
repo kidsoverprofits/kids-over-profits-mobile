@@ -525,6 +525,11 @@ export type OperatorListItem = {
   status: string;
   /** Five or more programs, a published history or a large place on the map. */
   major: boolean;
+  /**
+   * Still operating (kop_operator_history_is_active()): the stated status, else an open program;
+   * false for one closed, merged or acquired, or whose programs on record have all closed.
+   */
+  active: boolean;
 };
 export type OperatorsList = { api_version: number; total: number; items: OperatorListItem[] };
 

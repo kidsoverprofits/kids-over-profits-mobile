@@ -141,17 +141,29 @@ describe('Places tab', () => {
 });
 
 describe('Companies tab', () => {
-  const companies = [...operators.items].sort((a, b) => a.name.localeCompare(b.name));
+  const all = [...operators.items].sort((a, b) => a.name.localeCompare(b.name));
+  const companies = all.filter((c) => c.active);
+  const closed = all.filter((c) => !c.active);
 
-  it('draws a tile for each company with its program count', async () => {
+  it('draws a tile for each operating company with its program count', async () => {
     await render(<CompaniesScreen />);
     expect(screen.getByText('Parent companies')).toBeTruthy();
-    expect(screen.getByText(`${companies.length} companies`)).toBeTruthy();
+    expect(screen.getByText(`${companies.length} operating companies`)).toBeTruthy();
     // The list draws its first screens at once and the rest on scroll.
     for (const c of companies.slice(0, 8)) {
       expect(screen.getByText(c.name)).toBeTruthy();
       expect(screen.getAllByText(`${c.programs} ${c.programs === 1 ? 'program' : 'programs'}`).length).toBeGreaterThan(0);
     }
+  });
+
+  it('keeps closed, merged and acquired companies apart, a tap away', async () => {
+    expect(closed.length).toBeGreaterThan(0);
+    await render(<CompaniesScreen />);
+    expect(screen.queryByText(closed[0].name)).toBeNull();
+    await fireEvent.press(screen.getByLabelText('Show closed, merged or acquired companies'));
+    expect(screen.getByText(`${closed.length} closed, merged or acquired companies`)).toBeTruthy();
+    expect(screen.getByText(closed[0].name)).toBeTruthy();
+    expect(screen.queryByText(companies[0].name)).toBeNull();
   });
 
   it('has an alphabet row with a button for the first letter of each company', async () => {
