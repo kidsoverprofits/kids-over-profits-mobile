@@ -7,9 +7,9 @@ import { spacing, type } from '@/theme/typography';
 import { AboutText, hasAbout } from '../record/About';
 import { ResearchList, SourceArchives } from '../record/Archives';
 import { Quote } from '../record/Quote';
-import { Button, HubListRow, SectionBlock, type TimelineItem } from '../site';
+import { Button, HubListRow, SectionBlock } from '../site';
 import type { SectionProps } from './model';
-import { Bullets, LimitedTimeline } from './parts';
+import { Bullets } from './parts';
 
 /** The page has a Documents section: our library, research that names it, or files others hold. */
 export const hasDocuments = (f: FacilityPayload) => !!f.documents?.url || (f.research?.length ?? 0) > 0 || (f.archives?.length ?? 0) > 0;
@@ -103,16 +103,10 @@ export function TestimonySection({ f, onLayoutY }: SectionProps & { f: FacilityP
 
 export function ForumSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
   const forum = f.forum;
-  if (!forum || !(forum.incidents?.length || forum.leads?.length || forum.links?.length)) return null;
-  const incidents: TimelineItem[] = (forum.incidents ?? []).map((i) => ({
-    when: i.when,
-    kind: i.kind,
-    text: i.text,
-    sources: [i, ...(i.also ?? [])],
-  }));
+  // No dated timeline of forum posts (owner, 2026-11-17): the leads and the thread links only.
+  if (!forum || !(forum.leads?.length || forum.links?.length)) return null;
   return (
     <SectionBlock id="forum" title="Reported on survivor forums" icon="users" onLayoutY={onLayoutY}>
-      {incidents.length ? <LimitedTimeline items={incidents} /> : null}
       {forum.leads?.length ? <Bullets items={forum.leads} /> : null}
       {(forum.links ?? []).map((l, i) => (
         <HubListRow key={i} title={l.label} url={l.url} />

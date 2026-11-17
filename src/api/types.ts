@@ -388,7 +388,8 @@ export type FacilityPayload = {
   archives?: SourceArchive[];
   outside_research?: OutsideResearch[];
   profile?: ProfilePost | null;
-  forum: { incidents?: Incident[]; leads?: string[]; links?: { url: string; label: string }[] } | null;
+  /** Forum leads and thread links; forum incident lines are not sent (no timeline of forum posts). */
+  forum: { leads?: string[]; links?: { url: string; label: string }[] } | null;
   videos: { provider: string; id: string; title: string; url: string; source: string; thumb: string }[];
   profile_links: Link[];
   resources: HeldResource[];

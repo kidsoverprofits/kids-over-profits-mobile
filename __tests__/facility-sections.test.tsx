@@ -141,15 +141,14 @@ describe('incidents, forums and testimony', () => {
     expect(screen.getByText(provo.incidents[0].text)).toBeTruthy();
   });
 
-  it('keeps forum reports apart from the record, with the thread link', async () => {
+  it('keeps forum threads apart from the record, with no timeline of forum posts', async () => {
     await show(provo);
     const forum = provo.forum!;
     expect(screen.getByLabelText('Reported on survivor forums')).toBeTruthy();
-    expect(screen.getAllByText(startsWith(forum.incidents![0].text)).length).toBeGreaterThan(0);
     for (const l of forum.links!) expect(screen.getByLabelText(l.label)).toBeTruthy();
-    // A forum post is never also an incident of the record.
-    const record = new Set(provo.incidents.map((i) => i.text));
-    expect(forum.incidents!.some((i) => record.has(i.text))).toBe(false);
+    expect('incidents' in forum).toBe(false);
+    // A forum post is never an incident of the record.
+    expect(provo.incidents.some((i) => /^Fornits/i.test(i.cite ?? ''))).toBe(false);
   });
 
   it('lists the forum leads', async () => {

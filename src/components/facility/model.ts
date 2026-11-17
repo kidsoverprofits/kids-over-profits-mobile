@@ -143,7 +143,7 @@ export function presentSections(page: FacilityPayload): SectionDef[] {
   const f = pageView(page);
   const homes = homeRows(f);
   const forum = f.forum;
-  const forumHas = !!(forum && (forum.incidents?.length || forum.leads?.length || forum.links?.length));
+  const forumHas = !!(forum && (forum.leads?.length || forum.links?.length));
   const staff = staffRows(f.staff);
   const about = f.about;
   const hasAboutText = !!about && ((about.paragraphs?.length ?? 0) > 0 || (about.also ?? []).some((a) => a.url));
