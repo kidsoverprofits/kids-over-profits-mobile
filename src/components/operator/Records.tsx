@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { LawsuitRow, MemorialRow, OperatorPayload } from '@/api/types';
-import { Button, EdgeRow, HubListRow, RecordNewsCard, SectionBlock, useOpenLink } from '@/components/site';
+import { Button, EdgeRow, HubListRow, NewsFolds, RecordNewsCard, SectionBlock, splitNews, useOpenLink } from '@/components/site';
 import { hitSlopFor } from '@/components/site/metrics';
 import { cleanProse } from '@/lib/citations';
 import { slugFromUrl } from '@/lib/links';
@@ -13,8 +13,12 @@ import { spacing, type } from '@/theme/typography';
 import { aboutOf } from './model';
 
 export function NewsSection({ o }: { o: OperatorPayload }) {
+  // Passing mentions and celebrity stories fold apart, as on the website's company page.
+  const { main, passing, aside } = splitNews(o.news ?? []);
   return (
-    <SectionBlock id="news" title="News coverage" icon="newspaper" items={o.news ?? []} limit={4} renderItem={(n) => <RecordNewsCard item={n} />} />
+    <SectionBlock id="news" title="News coverage" icon="newspaper" items={main} limit={4} renderItem={(n) => <RecordNewsCard item={n} />}>
+      <NewsFolds passing={passing} aside={aside} what="its programs" />
+    </SectionBlock>
   );
 }
 

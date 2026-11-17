@@ -5,6 +5,7 @@ export { GlanceBox, type GlanceRow } from './GlanceBox';
 export { PersonCard, type PersonEntry, type Job } from './PersonCard';
 export { Timeline, type TimelineItem } from './Timeline';
 export { RecordNewsCard } from './RecordNewsCard';
+export { NewsFold, NewsFolds, splitNews, passingLabel, asideLabel } from './NewsFold';
 export { EdgeRow, HubListRow, DirectoryFacilityRow, type DirectoryFacilityRowProps } from './Rows';
 export { FindingCard, type Severity } from './FindingCard';
 export { NoticeBox } from './NoticeBox';

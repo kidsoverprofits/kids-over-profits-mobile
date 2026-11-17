@@ -205,7 +205,7 @@ export function statTiles(f: FacilityPayload): {
     },
     { key: 'lawsuits', icon: 'scale', count: n('lawsuits', f.lawsuits.length), singular: 'lawsuit', plural: 'lawsuits', tone: 'warn' },
     { key: 'incidents', icon: 'siren', count: n('incidents', f.incidents.length), singular: 'incident on record', plural: 'incidents on record', tone: 'warn' },
-    { key: 'news', icon: 'newspaper', count: n('news', f.news.length), singular: 'news article', plural: 'news articles', tone: 'info' },
+    { key: 'news', icon: 'newspaper', count: n('news', f.news.filter((x) => !x.passing).length), singular: 'news article', plural: 'news articles', tone: 'info' },
     { key: 'staff', icon: 'users', count: n('staff', staffRows(f.staff).length), singular: 'staff member named', plural: 'staff members named', tone: 'info' },
   ];
 }

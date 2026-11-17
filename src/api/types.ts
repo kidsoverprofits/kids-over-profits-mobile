@@ -31,6 +31,10 @@ export type NewsItem = {
   story_group_id?: number | null;
   link_type?: string;
   about?: string;
+  /** A celebrity or viral story: the record pages fold it apart. */
+  aside?: boolean;
+  /** The article names the program only in passing: folded apart, not counted (inc/news-passing.php). */
+  passing?: boolean;
 };
 
 export type StoryArc = {

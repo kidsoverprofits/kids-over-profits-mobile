@@ -11,8 +11,10 @@ import {
   FindingCard,
   HubListRow,
   InlineSources,
+  NewsFolds,
   RecordNewsCard,
   SectionBlock,
+  splitNews,
   useOpenLink,
   type TimelineItem,
 } from '../site';
@@ -98,7 +100,7 @@ function EraSection({ era, f, onLayoutY }: SectionProps & { era: Era; f: Facilit
             ) : kind === 'incidents' ? (
               <LimitedTimeline items={timeline(era.incidents)} />
             ) : kind === 'news' ? (
-              <Limited items={era.news} limit={4} render={(n) => <RecordNewsCard item={n} />} />
+              <EraNews items={era.news} />
             ) : (
               <Limited items={staffRows(era.staff)} limit={6} render={(row, j) => <StaffRowView row={row} index={j} />} />
             )}
@@ -238,10 +240,24 @@ export function IncidentsSection({ f, onLayoutY }: SectionProps & { f: FacilityP
   );
 }
 
-export function NewsSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
+/** A name's articles: the main list, then passing mentions and celebrity stories folded apart, as on the website. */
+function EraNews({ items }: { items: Era['news'] }) {
+  const { main, passing, aside } = splitNews(items);
   return (
-    <SectionBlock id="news" title="News coverage" icon="newspaper" items={f.news} limit={4} onLayoutY={onLayoutY}
-      renderItem={(n) => <RecordNewsCard item={n} />} />
+    <View style={styles.eraNews}>
+      <Limited items={main} limit={4} render={(n) => <RecordNewsCard item={n} />} />
+      <NewsFolds passing={passing} aside={aside} />
+    </View>
+  );
+}
+
+export function NewsSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
+  const { main, passing, aside } = splitNews(f.news);
+  return (
+    <SectionBlock id="news" title="News coverage" icon="newspaper" items={main} count={main.length} limit={4} onLayoutY={onLayoutY}
+      renderItem={(n) => <RecordNewsCard item={n} />}>
+      <NewsFolds passing={passing} aside={aside} />
+    </SectionBlock>
   );
 }
 
@@ -284,6 +300,7 @@ export function SiblingsSection({ f, onLayoutY }: SectionProps & { f: FacilityPa
 
 const styles = StyleSheet.create({
   eraPart: { gap: spacing.sm },
+  eraNews: { gap: spacing.sm },
   video: { ...card, overflow: 'hidden' },
   pressed: { backgroundColor: colors.sand },
   thumb: { width: '100%', aspectRatio: 16 / 9, backgroundColor: colors.sand, borderTopLeftRadius: radius.tile, borderTopRightRadius: radius.tile },
