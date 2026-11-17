@@ -48,6 +48,15 @@ describe('field mapping', () => {
     expect(out.details).toEqual({ court: 'X' });
   });
 
+  it('puts passing names in their own box, never one already in Facilities', () => {
+    const d = { ...emptyNewsDraft(), facilities: 'Alpha', passing_facilities: 'Old' };
+    const f = readNewsFields({ facilities: ['Beta'], passing_facilities: ['alpha', 'beta', 'Gamma', 'old'] });
+    const out = applyNewsFields(d, f, []);
+    expect(out.facilities).toBe('Alpha\nBeta');
+    expect(out.passing_facilities).toBe('Old\nGamma');
+    expect(readNewsFields({}).passing_facilities).toEqual([]);
+  });
+
   it('ignores a bad date and an article type the site does not list', () => {
     const out = applyNewsFields(emptyNewsDraft(), readNewsFields({ published: 'May 2024', article_type: 'other' }), [{ value: 'news', label: 'News' }]);
     expect(out.published).toBe('');
@@ -67,12 +76,12 @@ describe('field mapping', () => {
 describe('submit bodies', () => {
   it('builds the extension article body', () => {
     const d = {
-      ...emptyNewsDraft(' https://x.org/a '), title: ' T ', article_type: 'arrest', facilities: 'A\n\nB', tags: 'x, y,',
+      ...emptyNewsDraft(' https://x.org/a '), title: ' T ', article_type: 'arrest', facilities: 'A\n\nB', passing_facilities: ' C \n', tags: 'x, y,',
       warnings: ['Abuse'], details: { charges: ' theft ', stale: 'no' }, archive_url: 'https://web.archive.org/web/1/x', notes: '',
     };
     const body = buildNewsSubmitBody(d, { details: { arrest: { charges: 'Charges' } } }, true);
     expect(body).toMatchObject({
-      type: 'article', full: 1, publish: 1, url: 'https://x.org/a', title: 'T', facilities: ['A', 'B'], tags: ['x', 'y'],
+      type: 'article', full: 1, publish: 1, url: 'https://x.org/a', title: 'T', facilities: ['A', 'B'], passing_facilities: ['C'], tags: ['x', 'y'],
       content_warnings: ['Abuse'], details: { charges: 'theft' }, archive_url: 'https://web.archive.org/web/1/x', article_type: 'arrest',
     });
     expect(body).not.toHaveProperty('notes');

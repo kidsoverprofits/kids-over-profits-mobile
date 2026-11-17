@@ -167,6 +167,7 @@ export default function NewsProcessorScreen() {
 
           <Section title="3. People, places and tags">
             <Field label="Facilities" value={d.facilities} onChangeText={(t) => set('facilities', t)} multiline autoCapitalize="words" hint="One per line." />
+            <Field label="Named only in passing" value={d.passing_facilities} onChangeText={(t) => set('passing_facilities', t)} multiline autoCapitalize="words" hint="One per line. Linked, but listed apart on the program's page." />
             <Field label="Staff and company people" value={d.staff} onChangeText={(t) => set('staff', t)} multiline autoCapitalize="words" hint="One per line." />
             <Field label="Survivors and families" value={d.survivors} onChangeText={(t) => set('survivors', t)} multiline autoCapitalize="words" hint="One per line." />
             <Field label="Tags" value={d.tags} onChangeText={(t) => set('tags', t)} autoCapitalize="none" hint="Separated by commas." />

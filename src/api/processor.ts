@@ -33,6 +33,8 @@ export type NewsFields = {
   location: string;
   tags: string[];
   facilities: string[];
+  /** Named only in passing (inc/news-passing.php): linked, but listed apart on the pages. */
+  passing_facilities: string[];
   staff: string[];
   survivors: string[];
   summary: string;
@@ -74,6 +76,7 @@ export type NewsDraft = {
   article_type: string;
   tags: string;
   facilities: string;
+  passing_facilities: string;
   staff: string;
   survivors: string;
   warnings: string[];
@@ -113,7 +116,7 @@ export type ProcessorOutcome =
 
 export const emptyNewsDraft = (url = ''): NewsDraft => ({
   url, archive_url: '', title: '', author: '', published: '', site_name: '', location: '', alternate_title: '', summary: '',
-  article_type: '', tags: '', facilities: '', staff: '', survivors: '', warnings: [], details: {}, notes: '',
+  article_type: '', tags: '', facilities: '', passing_facilities: '', staff: '', survivors: '', warnings: [], details: {}, notes: '',
 });
 export const emptyLawsuitDraft = (url = ''): LawsuitDraft => ({
   url, case_name: '', case_number: '', court: '', jurisdiction: '', filing_date: '', status: '', outcome: '',
@@ -157,6 +160,7 @@ export function readNewsFields(raw: Json): NewsFields {
     location: str(raw.location),
     tags: strList(raw.tags),
     facilities: strList(raw.facilities),
+    passing_facilities: strList(raw.passing_facilities),
     staff: strList(raw.staff),
     survivors: strList(raw.survivors),
     summary: str(raw.summary),
@@ -202,6 +206,8 @@ export function applyNewsFields(d: NewsDraft, f: NewsFields, types: Option[] = [
     alternate_title: ifEmpty(d.alternate_title, f.alternate_title),
     summary: ifEmpty(d.summary, f.summary),
     facilities: mergeLines(d.facilities, f.facilities),
+    // A name already in Facilities stays a full link; never listed twice.
+    passing_facilities: mergeLines(d.passing_facilities, f.passing_facilities.filter((n) => ![...lines(d.facilities), ...f.facilities].some((x) => same(x, n)))),
     staff: mergeLines(d.staff, f.staff),
     survivors: mergeLines(d.survivors, f.survivors),
     tags: mergeTags(d.tags, f.tags),
@@ -249,6 +255,7 @@ export function buildNewsSubmitBody(d: NewsDraft, newsForm: Pick<NewsForm, 'deta
     title: d.title.trim() || d.url.trim(),
     tags: commaList(d.tags),
     facilities: lines(d.facilities),
+    passing_facilities: lines(d.passing_facilities),
     staff: lines(d.staff),
     survivors: lines(d.survivors),
     content_warnings: d.warnings,
