@@ -106,6 +106,8 @@ function EraSection({ era, f, onLayoutY }: SectionProps & { era: Era; f: Facilit
             )}
           </View>
         ))
+      ) : (era.incidents_in_timeline ?? 0) > 0 ? (
+        <Lead>Its incidents are in the Timeline.</Lead>
       ) : (
         <Lead>Nothing on record is dated to these years yet.</Lead>
       )}
@@ -233,8 +235,12 @@ export function LawsuitsSection({ f, onLayoutY }: SectionProps & { f: FacilityPa
 export function IncidentsSection({ f, onLayoutY }: SectionProps & { f: FacilityPayload }) {
   const items = timeline(f.incidents);
   if (!items.length) return null;
+  const inTimeline = f.incidents_in_timeline ?? 0;
   return (
     <SectionBlock id="incidents" title="Incidents on record" icon="siren" count={items.length} onLayoutY={onLayoutY}>
+      {inTimeline > 0 ? (
+        <Lead>{inTimeline === 1 ? 'The dated incident is' : `The ${inTimeline} dated incidents are`} in the Timeline. These have no date.</Lead>
+      ) : null}
       <LimitedTimeline items={items} />
     </SectionBlock>
   );

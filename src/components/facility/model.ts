@@ -133,7 +133,10 @@ export const eraCount = (era: Era, kind: EraKind) =>
 /** Where a stat tile jumps: its own section, or on a renamed program's page the first name that has the kind. */
 export function tileAnchor(f: FacilityPayload, kind: string): string {
   const era = erasOf(f).find((e) => (ERA_KINDS.some((k) => k.kind === kind) ? eraCount(e, kind as EraKind) > 0 : false));
-  return era ? era.id : kind;
+  if (era) return era.id;
+  // Every incident told in the timeline (none undated left): the tile jumps there, as on the website.
+  if (kind === 'incidents' && !pageView(f).incidents.length && (f.timeline?.length ?? 0) > 0) return 'timeline';
+  return kind;
 }
 
 export type SectionDef = { id: string; label: string };
@@ -204,7 +207,7 @@ export function statTiles(f: FacilityPayload): {
       singular: 'serious violation confirmed by inspectors', plural: 'serious violations confirmed by inspectors', tone: 'grave',
     },
     { key: 'lawsuits', icon: 'scale', count: n('lawsuits', f.lawsuits.length), singular: 'lawsuit', plural: 'lawsuits', tone: 'warn' },
-    { key: 'incidents', icon: 'siren', count: n('incidents', f.incidents.length), singular: 'incident on record', plural: 'incidents on record', tone: 'warn' },
+    { key: 'incidents', icon: 'siren', count: f.incidents_total ?? n('incidents', f.incidents.length), singular: 'incident on record', plural: 'incidents on record', tone: 'warn' },
     { key: 'news', icon: 'newspaper', count: n('news', f.news.filter((x) => !x.passing).length), singular: 'news article', plural: 'news articles', tone: 'info' },
     { key: 'staff', icon: 'users', count: n('staff', staffRows(f.staff).length), singular: 'staff member named', plural: 'staff members named', tone: 'info' },
   ];

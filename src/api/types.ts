@@ -200,6 +200,8 @@ export type Era = EraLists & {
   operators: string[];
   /** The record kept under this name when it is another record's; empty for this one. */
   url: string;
+  /** Its dated incidents, told in the timeline instead (incidents_in_timeline). */
+  incidents_in_timeline?: number;
 };
 
 /** A renamed program's page cut into one section per name; `rest` is what no name took, `totals` the whole page's counts. */
@@ -379,6 +381,12 @@ export type FacilityPayload = {
   questions_url?: string;
   rules?: RuleGroup[];
   timeline?: PageTimelineYear[];
+  /**
+   * Incidents show once (website, 2026-11-19): beside a timeline every incident list keeps only the lines with no year.
+   * incidents_total counts them all (the tile), incidents_in_timeline the ones the timeline tells.
+   */
+  incidents_total?: number;
+  incidents_in_timeline?: number;
   federal_funding?: FundingStream[];
   nonprofits?: NonprofitOrg[];
   businesses?: BusinessEntity[];

@@ -8,7 +8,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react-native
 
 import type { Era, FacilityPayload } from '@/api/types';
 import FacilityScreen from '@/app/facility/[slug]';
-import { pageView, staffRows, statTiles } from '@/components/facility/model';
+import { pageView, staffRows, statTiles, tileAnchor } from '@/components/facility/model';
 
 const mockFacility: { current: FacilityPayload } = { current: require('./fixtures/facility-12155.json') };
 
@@ -139,6 +139,21 @@ describe('incidents, forums and testimony', () => {
     expect(provo.incidents.length).toBeGreaterThan(5);
     expect(screen.getByLabelText(`Incidents on record, ${provo.incidents.length}`)).toBeTruthy();
     expect(screen.getByText(provo.incidents[0].text)).toBeTruthy();
+  });
+
+  it('shows a dated incident once: the timeline tells it, the section keeps the undated ones', async () => {
+    const timeline = [{ year: 2012, events: [] }] as unknown as FacilityPayload['timeline'];
+    const undated = { ...provo.incidents[0], when: '', text: 'An incident with no year on record.' };
+    const n = provo.incidents.length;
+    const cut = { ...provo, timeline, incidents: [undated], incidents_total: n + 1, incidents_in_timeline: n };
+    await show(cut);
+    expect(screen.getByLabelText('Incidents on record, 1')).toBeTruthy();
+    expect(screen.getByText(`The ${n} dated incidents are in the Timeline. These have no date.`)).toBeTruthy();
+    expect(screen.queryByText(provo.incidents[0].text)).toBeNull();
+    // The tile still counts every incident; with none undated left it jumps to the timeline.
+    expect(statTiles(cut).find((t) => t.key === 'incidents')?.count).toBe(n + 1);
+    expect(tileAnchor(cut, 'incidents')).toBe('incidents');
+    expect(tileAnchor({ ...cut, incidents: [] }, 'incidents')).toBe('timeline');
   });
 
   it('keeps forum threads apart from the record, with no timeline of forum posts', async () => {
